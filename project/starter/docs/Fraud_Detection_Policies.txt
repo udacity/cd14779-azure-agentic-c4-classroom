@@ -1,0 +1,48 @@
+1. Suspicious Transaction Indicators
+Financial institutions must maintain vigilant monitoring systems to detect potentially fraudulent activities. The following indicators should trigger enhanced scrutiny:
+
+Uncharacteristic Transaction Patterns: Transfers or withdrawals that significantly deviate from a customer's established financial behavior, particularly those exceeding 30% of their typical transaction amounts or occurring at unusual frequencies.
+
+Authentication Anomalies: Multiple failed authentication attempts followed immediately by successful access and transaction activity, especially when these attempts originate from unfamiliar devices or locations.
+
+Geographic Irregularities: Transactions occurring in geographically disparate locations within implausible timeframes (e.g., purchases in different countries within hours of each other), or activities originating from high-risk jurisdictions identified by regulatory authorities.
+
+Limits Testing Behavior: Systematic attempts to approach or exceed account limits through a rapid sequence of transactions, particularly ATM withdrawals, fund transfers, or merchant purchases occurring in quick succession.
+
+Account Takeover Signals: Changes to account security settings (passwords, security questions, contact information) followed immediately by transaction activity, especially when these changes originate from unrecognized devices or IP addresses.
+
+2. Compliance Requirements
+All fraud detection activities must operate within established regulatory frameworks:
+
+AML Protocol Adherence: Strict compliance with Anti-Money Laundering guidelines as outlined in the Bank Secrecy Act, including proper documentation of suspicious activity reports (SARs) and currency transaction reports (CTRs).
+
+Mandatory Reporting Thresholds: Immediate reporting to the Financial Crimes Enforcement Network (FinCEN) for any transactions exceeding $10,000 that display suspicious characteristics, with additional reporting required for patterns of structured transactions designed to avoid reporting thresholds.
+
+Customer Verification Protocols: Implementation of comprehensive Know Your Customer (KYC) procedures before implementing any account restrictions, including multi-factor authentication, knowledge-based verification, and documentation review consistent with Customer Identification Program (CIP) requirements.
+
+Record Keeping Standards: Maintenance of detailed investigation records for a minimum of five years, including all evidence reviewed, decisions made, and communications with customers and regulatory bodies.
+
+3. Recommended Actions
+When potential fraud is detected, staff should follow this escalation and response protocol:
+
+Tiered Response System: Implement a multi-level response strategy based on risk assessment scores:
+
+Low-risk indicators (score 30-50%): Flag for automated monitoring and include in periodic review reports
+
+Medium-risk indicators (score 50-70%: Initiate immediate customer contact for transaction verification
+
+High-risk indicators (score >70%): Implement temporary account restrictions pending investigation
+
+Customer Notification Procedures: Immediate notification through multiple channels (SMS, email, automated call) for any suspected fraudulent activity, with clear instructions for customer response and verification.
+
+Investigation Workflow: Formalized investigation procedures including:
+
+Documentation of all relevant transaction details
+
+Cross-referencing with historical patterns and blacklisted entities
+
+Coordination with law enforcement when appropriate
+
+Completion of standard investigation forms within designated timeframes
+
+Recovery Protocols: Established procedures for fund recovery, account restoration, and customer support following confirmed fraud incidents, including issuing replacement cards, restoring compromised funds, and providing credit monitoring services when appropriate.
