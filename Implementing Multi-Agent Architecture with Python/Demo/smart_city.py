@@ -1,21 +1,17 @@
 import asyncio
 import os
-from typing import Dict
 from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
-from semantic_kernel.functions import kernel_function
+from semantic_kernel.functions.kernel_function_from_prompt import KernelFunctionFromPrompt
 from dotenv import load_dotenv
 load_dotenv()
 
-class CityAgent:
-    """Base agent class for smart city monitoring"""
-    
+class Cityworker:
     def __init__(self, name: str, expertise: str):
         self.name = name
         self.expertise = expertise
         self.kernel = Kernel()
         
-        # Add Azure OpenAI service with explicit authentication:cite[7]
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="chat_completion",
@@ -26,109 +22,81 @@ class CityAgent:
         )
     
     async def process_request(self, request: str) -> str:
-        """Process a monitoring request - to be implemented by subclasses"""
         raise NotImplementedError("Subclasses must implement this method")
 
-class TrafficAgent(CityAgent):
-    """Specialized agent for traffic monitoring and management"""
-    
+class Trafficworker(Cityworker):
     def __init__(self):
         super().__init__("Traffic Manager", "Urban traffic flow and congestion management")
-        
-        # Add traffic-specific functions as a plugin:cite[6]
-        self.kernel.add_plugin(self.TrafficPlugin(), "TrafficPlugin")
-    
-    class TrafficPlugin:
-        @kernel_function(description="Analyze traffic congestion patterns")
-        def analyze_congestion(self, location: str) -> str:
-            """Simulate traffic congestion analysis"""
-            return f"Moderate congestion detected at {location}. Average speed: 25 mph. Recommended actions: Adjust traffic signals."
     
     async def process_request(self, request: str) -> str:
-        """Process traffic-related requests"""
-        # Use the traffic plugin to analyze congestion
-        traffic_function = self.kernel.get_function("TrafficPlugin", "analyze_congestion")
-        result = await self.kernel.invoke(traffic_function, location="downtown")
+        prompt = "You are a traffic expert. Analyze this traffic situation: {{$request}}"
+        function = KernelFunctionFromPrompt(
+            function_name="traffic_analysis",
+            plugin_name="traffic",
+            prompt=prompt
+        )
         
-        return f"Traffic Analysis by {self.name}: {result}"
+        result = await self.kernel.invoke(function, request=request)
+        return f"🚦 Traffic Analysis:\n{result}"
 
-class EnergyAgent(CityAgent):
-    """Specialized agent for energy consumption monitoring"""
-    
+class Energyworker(Cityworker):
     def __init__(self):
         super().__init__("Energy Analyst", "City energy consumption and distribution")
-        
-        # Add energy-specific functions as a plugin:cite[6]
-        self.kernel.add_plugin(self.EnergyPlugin(), "EnergyPlugin")
-    
-    class EnergyPlugin:
-        @kernel_function(description="Analyze energy consumption patterns")
-        def analyze_consumption(self, area: str) -> str:
-            """Simulate energy consumption analysis"""
-            return f"High energy consumption detected in {area}. Peak usage: 2-5 PM. Recommended actions: Implement load shifting."
     
     async def process_request(self, request: str) -> str:
-        """Process energy-related requests"""
-        # Use the energy plugin to analyze consumption
-        energy_function = self.kernel.get_function("EnergyPlugin", "analyze_consumption")
-        result = await self.kernel.invoke(energy_function, area="residential district")
+        prompt = "You are an energy expert. Analyze this energy situation: {{$request}}"
+        function = KernelFunctionFromPrompt(
+            function_name="energy_analysis",
+            plugin_name="energy",
+            prompt=prompt
+        )
         
-        return f"Energy Analysis by {self.name}: {result}"
+        result = await self.kernel.invoke(function, request=request)
+        return f"⚡ Energy Analysis:\n{result}"
 
-class CityCoordinator:
-    """Orchestrates multiple city monitoring agents"""
-    
+class Safetyworker(Cityworker):
     def __init__(self):
-        self.agents = {
-            "traffic": TrafficAgent(),
-            "energy": EnergyAgent()
-        }
+        super().__init__("Safety Officer", "Public safety and emergency response")
     
-    async def coordinate_monitoring(self, monitoring_request: str) -> Dict[str, str]:
-        """Coordinate monitoring across multiple specialized agents"""
-        results = {}
+    async def process_request(self, request: str) -> str:
+        prompt = "You are a safety expert. Analyze this safety situation: {{$request}}"
+        function = KernelFunctionFromPrompt(
+            function_name="safety_analysis",
+            plugin_name="safety",
+            prompt=prompt
+        )
         
-        # Process request with all relevant agents in parallel
-        tasks = []
-        for agent_name, agent in self.agents.items():
-            tasks.append(agent.process_request(monitoring_request))
-        
-        # Gather all results
-        agent_results = await asyncio.gather(*tasks)
-        
-        for (agent_name, _), result in zip(self.agents.items(), agent_results):
-            results[agent_name] = result
-        
-        return results
+        result = await self.kernel.invoke(function, request=request)
+        return f"🚨 Safety Analysis:\n{result}"
 
-# Demo execution
 async def main():
-    print("Smart City Infrastructure Monitoring Multi-Agent System Demo")
-    print("============================================================")
-    print("Using Semantic Kernel 1.36.2")
-    print()
+    print("Smart City Monitoring Demo - Semantic Kernel 1.36.2")
+    print("=" * 50)
     
-    coordinator = CityCoordinator()
+    workers = {
+        "traffic": Trafficworker(),
+        "energy": Energyworker(),
+        "safety": Safetyworker()
+    }
     
-    # Sample monitoring scenarios
     scenarios = [
-        "Analyze downtown traffic patterns during morning rush hour",
-        "Assess energy consumption peaks in residential areas"
+        "Heavy traffic congestion on Main Street",
+        "High energy consumption in downtown area",
+        "Safety concerns in Central Park"
     ]
     
     for i, scenario in enumerate(scenarios, 1):
-        print(f"Scenario {i}: {scenario}")
-        print("-" * 60)
+        print(f"\nScenario {i}: {scenario}")
+        print("-" * 40)
         
-        results = await coordinator.coordinate_monitoring(scenario)
+        tasks = [worker.process_request(scenario) for worker in workers.values()]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        for agent_type, analysis in results.items():
-            print(f"{agent_type.upper()} ANALYSIS:")
-            print(analysis)
-            print()
-        
-        print("=" * 60)
-        print()
+        for (name, worker), result in zip(workers.items(), results):
+            if isinstance(result, Exception):
+                print(f"{worker.name}: Error - {result}")
+            else:
+                print(f"{worker.name}:\n{result}\n")
 
 if __name__ == "__main__":
     asyncio.run(main())
