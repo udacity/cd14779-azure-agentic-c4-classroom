@@ -4,7 +4,7 @@ from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.functions.kernel_function_from_prompt import KernelFunctionFromPrompt
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv("../../../.env")
 
 class Cityworker:
     def __init__(self, name: str, expertise: str):
@@ -15,9 +15,9 @@ class Cityworker:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="chat_completion",
-                deployment_name=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-                api_key=os.environ["AZURE_OPENAI_API_KEY"]
+                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
             )
         )
     

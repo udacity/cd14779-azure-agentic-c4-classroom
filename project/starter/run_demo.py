@@ -14,8 +14,7 @@ from agents.fraud import FraudAgent
 from agents.loans import LoansAgent
 from agents.support import SupportAgent
 from agents.synthesis import SynthesisAgent
-
-load_dotenv()
+load_dotenv("../../.env")
 
 class AgentContext:
     def __init__(self, customer_id: str, payload: dict):

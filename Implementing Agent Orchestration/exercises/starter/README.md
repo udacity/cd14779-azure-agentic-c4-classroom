@@ -88,9 +88,9 @@ Select agents dynamically based on request content.
    Create a `.env` file with your Azure OpenAI credentials:
 
    ```env
-   AZURE_OPENAI_DEPLOYMENT_NAME=your-deployment-name
-   AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
-   AZURE_OPENAI_API_KEY=your-api-key
+   AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
+   AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+   AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
    ```
 
 3. **Run Starter Code**

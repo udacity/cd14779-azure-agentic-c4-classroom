@@ -1,46 +1,169 @@
 import asyncio
 import os
 from semantic_kernel import Kernel
+import pyodbc
+from contextlib import contextmanager
+from typing import List, Dict, Optional
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.functions.kernel_function_from_prompt import KernelFunctionFromPrompt
 from dotenv import load_dotenv
+load_dotenv("../../.env")
 
-load_dotenv()
 
 class BankDataConnector:
-    """Simple data connector for bank transactions (simulated)"""
+    """Data connector for bank transactions from Azure SQL Server"""
     
-    def __init__(self):
-        # In a real scenario, this would connect to Azure SQL Server
-        # For demo purposes, we'll use simulated data
-        self.transactions = [
-            {"id": 1, "account_id": "ACC001", "type": "deposit", "amount": 1000.00, "date": "2024-01-15", "status": "completed"},
-            {"id": 2, "account_id": "ACC001", "type": "withdrawal", "amount": 250.50, "date": "2024-01-16", "status": "completed"},
-            {"id": 3, "account_id": "ACC002", "type": "deposit", "amount": 500.00, "date": "2024-01-17", "status": "completed"},
-            {"id": 4, "account_id": "ACC001", "type": "transfer", "amount": 100.00, "date": "2024-01-18", "status": "pending"},
-            {"id": 5, "account_id": "ACC003", "type": "withdrawal", "amount": 50.00, "date": "2024-01-18", "status": "failed"},
-        ]
-    
-    def get_transactions(self, account_id=None):
-        """Get transactions - optionally filtered by account"""
-        if account_id:
-            return [t for t in self.transactions if t["account_id"] == account_id]
-        return self.transactions
-    
-    def get_account_balance(self, account_id):
-        """Calculate current balance for an account"""
-        account_transactions = self.get_transactions(account_id)
-        balance = 0.0
+    def __init__(self, connection_string: Optional[str] = None):
+        self.connection_string = connection_string or os.getenv("AZURE_SQL_CONNECTION_STRING")
+        if not self.connection_string:
+            raise ValueError("AZURE_SQL_CONNECTION_STRING environment variable not set")
         
-        for transaction in account_transactions:
-            if transaction["status"] == "completed":
-                if transaction["type"] == "deposit":
-                    balance += transaction["amount"]
-                else:  # withdrawal or transfer
-                    balance -= transaction["amount"]
-        
-        return balance
+        # Load initial data from database
+        self.transactions_data = self._load_transaction_data()
+    
+    # Database connection helper for Azure SQL Server
+    @contextmanager
+    def get_db_connection(self):
+        conn = pyodbc.connect(self.connection_string)
+        try:
+            yield conn
+        finally:
+            conn.close()
 
+    def _load_transaction_data(self) -> Dict[str, List[Dict]]:
+        """Load transaction data from Azure SQL database"""
+        try:
+            with self.get_db_connection() as conn:
+                cursor = conn.cursor()
+                data = {}
+                
+                # Query to get transaction data from Example_Transactions table
+                cursor.execute("""
+                    SELECT id, account_id, type, amount, 
+                           date, status, description 
+                    FROM Example_Transactions 
+                    ORDER BY date DESC
+                """)
+                
+                for row in cursor.fetchall():
+                    id, account_id, type, amount, date, status, description = row
+                    
+                    if data.get(account_id) is None:
+                        data[account_id] = {
+                            "transactions": [{
+                                "id": id,
+                                "account_id": account_id,
+                                "type": type,
+                                "amount": float(amount),
+                                "date": date.isoformat() if hasattr(date, 'isoformat') else str(date),
+                                "status": status,
+                                "description": description or ""
+                            }]
+                        }
+                    else:
+                        data[account_id]['transactions'].append({
+                            "id": id,
+                            "account_id": account_id,
+                            "type": type,
+                            "amount": float(amount),
+                            "date": date.isoformat() if hasattr(date, 'isoformat') else str(date),
+                            "status": status,
+                            "description": description or ""
+                        })
+                
+                print(f"✅ Loaded transactions for {len(data)} accounts from Example_Transactions table")
+                return data
+                
+        except Exception as e:
+            print(f"❌ Error loading transaction data: {e}")
+            return {}
+    
+    def get_transactions(self, account_id: Optional[str] = None) -> List[Dict]:
+        """Get transactions - optionally filtered by account"""
+        try:
+            if account_id:
+                # Return transactions for specific account
+                account_data = self.transactions_data.get(account_id, {})
+                return account_data.get("transactions", [])
+            else:
+                # Return all transactions across all accounts
+                all_transactions = []
+                for account_data in self.transactions_data.values():
+                    all_transactions.extend(account_data.get("transactions", []))
+                return all_transactions
+                
+        except Exception as e:
+            print(f"❌ Error getting transactions: {e}")
+            return []
+    
+    def get_account_balance(self, account_id: str) -> float:
+        """Calculate current balance for an account from database"""
+        try:
+            # Use the pre-loaded data for balance calculation
+            account_transactions = self.get_transactions(account_id)
+            balance = 0.0
+            
+            for transaction in account_transactions:
+                if transaction["status"] == "completed":
+                    if transaction["type"] in ["deposit", "credit"]:
+                        balance += transaction["amount"]
+                    else:  # withdrawal, transfer, debit
+                        balance -= transaction["amount"]
+            
+            return balance
+            
+        except Exception as e:
+            print(f"❌ Error calculating balance for account {account_id}: {e}")
+            return 0.0
+    
+    def add_transaction(self, account_id: str, type: str, amount: float, 
+                       description: str = "", status: str = "pending") -> bool:
+        """Add a new transaction to the database"""
+        try:
+            with self.get_db_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Insert new transaction record
+                cursor.execute("""
+                    INSERT INTO Example_Transactions 
+                    (account_id, type, amount, date, status, description)
+                    VALUES (?, ?, ?, GETDATE(), ?, ?)
+                """, account_id, type, amount, status, description)
+                
+                conn.commit()
+                print(f"✅ Added transaction for account {account_id}: {type} ${amount}")
+                
+                # Refresh the local data cache
+                self.transactions_data = self._load_transaction_data()
+                return True
+                
+        except Exception as e:
+            print(f"❌ Error adding transaction: {e}")
+            return False
+    
+    def get_accounts(self) -> List[str]:
+        """Get list of all account IDs from the database"""
+        try:
+            return list(self.transactions_data.keys())
+        except Exception as e:
+            print(f"❌ Error getting account list: {e}")
+            return ["ACC001", "ACC002", "ACC003"]  # Fallback
+    
+    def get_recent_transactions(self, account_id: str, limit: int = 5) -> List[Dict]:
+        """Get recent transactions for an account"""
+        try:
+            all_transactions = self.get_transactions(account_id)
+            # Sort by date descending and return limited results
+            sorted_transactions = sorted(
+                all_transactions, 
+                key=lambda x: x["date"], 
+                reverse=True
+            )
+            return sorted_transactions[:limit]
+        except Exception as e:
+            print(f"❌ Error getting recent transactions: {e}")
+            return []
+        
 class BankAgent:
     """Base class for all bank specialist agents"""
     
@@ -53,9 +176,9 @@ class BankAgent:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="chat_completion",
-                deployment_name=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-                api_key=os.environ["AZURE_OPENAI_API_KEY"]
+                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
             )
         )
     
@@ -220,9 +343,9 @@ class RoutingAgent:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="chat_completion",
-                deployment_name=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-                api_key=os.environ["AZURE_OPENAI_API_KEY"]
+                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
             )
         )
     
