@@ -1,0 +1,4 @@
+chromadb==1.0.20
+semantic-kernel==1.36.2
+python-docx==1.2.0
+pyodbc==5.2.0

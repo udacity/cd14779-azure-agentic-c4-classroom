@@ -28,21 +28,18 @@ A clean, easy-to-understand demo showing three different ways to coordinate mult
 #### 1. Sequential Pattern
 Request → Destination Agent → Flight Agent → Accommodation Agent
 
-text
 - Each agent completes before next one starts
 - Good for step-by-step planning
 
 #### 2. Parallel Pattern  
 Request → [All Agents Simultaneously] → Combined Results
 
-text
 - All agents work at the same time
 - Fastest for getting all recommendations
 
 #### 3. Conditional Pattern
 Request → Analysis → [Only Relevant Agents]
 
-text
 - Smart selection based on request content
 - Efficient use of resources
 
@@ -51,53 +48,52 @@ text
 ### 1. Installation
 ```bash
 pip install semantic-kernel==1.36.2 python-dotenv
-2. Setup Environment
+```
+### 2. Setup Environment
 Create .env file:
-
-env
+```env
 AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
 AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
 AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
-3. Run the Demo
-bash
+```
+### 3. Run the Demo
+```bash
 python simple_travel_demo.py
-📊 How It Works
-1. System Setup
+```
+## 📊 How It Works
+### 1. System Setup
 Loads Azure OpenAI configuration
 
 Creates three specialist agents
 
 Prepares the orchestrator
 
-2. Pattern Execution
-Sequential Pattern:
-text
+### 2. Pattern Execution
+#### Sequential Pattern:
 1. 🗺️ Destination Expert analyzes request → suggests places
 2. ✈️ Flight Expert uses likely destinations → finds flights  
 3. 🏨 Accommodation Expert → suggests hotels
-Parallel Pattern:
-text
+#### Parallel Pattern:
 [All 3 agents process simultaneously]
 → Destination: finding destinations
 → Flights: researching flights  
 → Accommodation: finding hotels
 [Wait for all to finish]
-Conditional Pattern:
-text
+#### Conditional Pattern:
 1. 🤖 Analyzes request: "Europe trip, history, medium budget"
 2. 🔍 Determines: needs all three agents
 3. 🗺️✈️🏨 Calls Destination, Flight, and Accommodation agents
-3. Results Display
+### 3. Results Display
 Each pattern shows:
 
-Which agents were called
+- Which agents were called
 
-Their recommendations
+- Their recommendations
 
-Clear, formatted output
+- Clear, formatted output
 
-🎪 Demo Output Example
-text
+## 🎪 Demo Output Example
+
 🌍 SIMPLIFIED TRAVEL PLANNING DEMO
 ==================================================
 
@@ -132,9 +128,9 @@ Flight duration: 8-10 hours from East Coast
 Price range: $800-1200 roundtrip
 Booking tips: Book 2-3 months early, be flexible with dates
 ----------------------------------------
-🛠️ Code Structure
-Agent Base Class
-python
+## 🛠️ Code Structure
+### Agent Base Class
+```python
 class TravelAgent:
     def __init__(self, name, specialty):
         self.name = name
@@ -143,15 +139,16 @@ class TravelAgent:
     
     async def process_request(self, request):
         # Each agent implements this
-Specialist Agents
-DestinationAgent: Where to go
+```
+### Specialist Agents
+- DestinationAgent: Where to go
 
-FlightAgent: How to get there
+- FlightAgent: How to get there
 
-AccommodationAgent: Where to stay
+- AccommodationAgent: Where to stay
 
-Orchestrator Class
-python
+### Orchestrator Class
+```python
 class TravelOrchestrator:
     def __init__(self):
         self.agents = {}  # Holds all agents
@@ -164,29 +161,32 @@ class TravelOrchestrator:
     
     async def conditional_orchestration(self, request):
         # Calls only relevant agents
-🏆 Pattern Comparison
-Pattern	Best For	Speed	Coordination
-Sequential	Complex planning	🐢 Slow	High
-Parallel	Quick overview	🐇 Fast	Low
-Conditional	Specific requests	🚗 Medium	Smart
-💡 When to Use Each Pattern
-Use Sequential When:
-You need step-by-step planning
+```
+## 🏆 Pattern Comparison
+| Pattern | Best For | Speed | Coordination |
+| :--- | :--- | :--- | :--- |
+| Sequential | Complex planning | 🐢 Slow | High |
+| Parallel | Quick overview | 🐇 Fast | Low |
+| Conditional | Specific requests | 🚗 Medium | Smart |
 
-Later steps depend on earlier results
+## 💡 When to Use Each Pattern
+### Use Sequential When:
+- You need step-by-step planning
 
-Planning complex, multi-stop trips
+- Later steps depend on earlier results
 
-Use Parallel When:
-You want fastest possible response
+- Planning complex, multi-stop trips
 
-Agents don't depend on each other
+### Use Parallel When:
+- You want fastest possible response
 
-Getting broad overview quickly
+- Agents don't depend on each other
 
-Use Conditional When:
-Requests are very specific
+- Getting broad overview quickly
 
-You want to save resources
+### Use Conditional When:
+- Requests are very specific
 
-Some agents aren't needed
+- You want to save resources
+
+- Some agents aren't needed

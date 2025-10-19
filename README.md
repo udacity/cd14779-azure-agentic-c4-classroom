@@ -10,10 +10,12 @@ This repo contains a folder for each `lesson` and one `project` folder.
 
 Example
 ```
-lesson-1-hello
-lesson-2-world
-lesson-3-foo
-lesson-4-bar
+lesson-1_implementing_multi_agent_architecture_with_python
+lesson-2_implementing_agent_orchestration
+lesson-3_implementing_routing_and_data_flow_in_agentic_systems
+lesson-4_implementing_state_management_in_multi_agent_systems
+lesson-5_implementing_multi_agent_orchestration_and_state_coordination
+lesson-6_implementing_multi_agent_retrieval_augmented_generation
 project
 ```
 
