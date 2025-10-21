@@ -547,3 +547,63 @@ class SynthesisAgent(RAGAgent):
         self.system_state.current_research_topic = topic
         
         return report
+
+# ADD YOUR NEW AGENT CLASS HERE
+# TODO: Create CompetitiveIntelligenceAgent class
+# This agent should:
+# 1. Search the "market" collection in ChromaDB
+# 2. Focus on competitive analysis and market positioning
+# 3. Extract competitive insights from documents
+# 4. Follow the same pattern as other agents
+
+class CompetitiveIntelligenceAgent(RAGAgent):
+    """TODO: Add agent description here"""
+    
+    def __init__(self, system_state: RAGSystemState, blob_connector: BlobStorageConnector, chroma_manager: ChromaDBManager):
+        # TODO: Initialize the agent with proper name and role
+        super().__init__("PLACEHOLDER_NAME", "PLACEHOLDER_ROLE", system_state, blob_connector, chroma_manager)
+    
+    async def retrieve_and_analyze(self, query: str, document_types: List[str] = None) -> Dict:
+        """TODO: Implement competitive intelligence retrieval and analysis"""
+        
+        # TODO: Use ChromaDB to search for competitive intelligence documents
+        # search_results = self.chroma_manager.semantic_search(...)
+        
+        # TODO: Handle case when no documents found
+        
+        # TODO: Store retrieved documents in system state (follow existing pattern)
+        
+        # TODO: Create analysis prompt for competitive intelligence
+        prompt = """
+        TODO: Create a prompt that focuses on:
+        - Competitive landscape analysis
+        - Market positioning
+        - Competitor strengths and weaknesses
+        - Strategic competitive recommendations
+        """
+        
+        # TODO: Complete the analysis using Azure OpenAI
+        # function = KernelFunctionFromPrompt(...)
+        # result = await self.kernel.invoke(...)
+        
+        # TODO: Return results in the standard format
+        return {
+            "agent": self.name,
+            "documents_found": 0,  # TODO: Replace with actual count
+            "analysis": "TODO: Add analysis result",
+            "competitive_insights": [],  # TODO: Extract competitive insights
+            "sources": [],  # TODO: Add source documents
+            "stored_document_ids": [],  # TODO: Add stored document IDs
+            "relevance_scores": [],  # TODO: Add relevance scores
+            "retrieval_method": "semantic_search"
+        }
+    
+    def _extract_competitive_insights(self, documents: List[Dict]) -> List[str]:
+        """TODO: Extract competitive insights from documents"""
+        insights = []
+        competitive_terms = ["competition", "competitor", "market share", "competitive", "advantage"]
+        
+        # TODO: Implement insight extraction logic
+        # Hint: Follow the pattern from other agents
+        
+        return insights if insights else ["General competitive analysis conducted"]

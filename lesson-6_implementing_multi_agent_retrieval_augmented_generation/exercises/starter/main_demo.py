@@ -8,7 +8,7 @@ from rag_agents import (
     MarketRetrievalAgent, SynthesisAgent
 )
 from dotenv import load_dotenv
-load_dotenv("../../.env")
+load_dotenv("../../../.env")
 # Setup logging
 logging.getLogger('semantic_kernel').setLevel(logging.WARNING)
 logging.getLogger('azure').setLevel(logging.WARNING)
@@ -28,11 +28,13 @@ class MultiAgentRAGSystem:
         # Initialize system state
         self.system_state = RAGSystemState()
         
-        # Initialize specialized agents
+        # Initialize specialized agents - ADD NEW AGENT HERE
         self.retrieval_agents = {
             "financial": FinancialRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
             "technical": TechnicalRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
-            "market": MarketRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager)
+            "market": MarketRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
+            # TODO: Add CompetitiveIntelligenceAgent here
+            # "competitive": CompetitiveIntelligenceAgent(...)
         }
         
         # Initialize synthesis agent
@@ -82,7 +84,9 @@ class MultiAgentRAGSystem:
         self.retrieval_agents = {
             "financial": FinancialRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
             "technical": TechnicalRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
-            "market": MarketRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager)
+            "market": MarketRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
+            # TODO: Add CompetitiveIntelligenceAgent here
+            # "competitive": CompetitiveIntelligenceAgent(...)
         }
         
         self.synthesis_agent = SynthesisAgent(self.system_state, self.blob_connector, self.chroma_manager)
@@ -221,13 +225,15 @@ async def main():
     rag_system = MultiAgentRAGSystem()
     
     # Demo research topics
+    # TODO: Add new research topics that leverage competitive intelligence
     research_topics = [
         "Company growth strategy and financial performance",
         "Technical architecture and AI platform development", 
         "Market competition and customer analysis",
-        "Product roadmap and future initiatives"
-    ]
-    
+        "Product roadmap and future initiatives",
+        # TODO: Add a topic that would benefit from competitive intelligence
+        # "Competitive landscape and market positioning"
+    ] 
     # Run analysis for each topic
     for i, topic in enumerate(research_topics, 1):
         print(f"\n{'='*70}")

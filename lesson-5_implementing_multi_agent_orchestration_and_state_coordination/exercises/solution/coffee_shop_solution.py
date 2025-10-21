@@ -7,7 +7,7 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.functions.kernel_function_from_prompt import KernelFunctionFromPrompt
 from pydantic import BaseModel, Field, field_validator
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv("../../../.env")
 
 # Pydantic Models
 class CoffeeOrder(BaseModel):

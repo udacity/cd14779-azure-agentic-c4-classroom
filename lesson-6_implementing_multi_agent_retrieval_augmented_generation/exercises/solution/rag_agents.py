@@ -547,3 +547,127 @@ class SynthesisAgent(RAGAgent):
         self.system_state.current_research_topic = topic
         
         return report
+
+# ADD YOUR NEW AGENT CLASS HERE
+class CompetitiveIntelligenceAgent(RAGAgent):
+    """Agent specializing in competitive intelligence and market positioning"""
+    
+    def __init__(self, system_state: RAGSystemState, blob_connector: BlobStorageConnector, chroma_manager: ChromaDBManager):
+        super().__init__("Competitive Intelligence Analyst", "Analyze competitive landscape and market positioning", system_state, blob_connector, chroma_manager)
+    
+    async def retrieve_and_analyze(self, query: str, document_types: List[str] = None) -> Dict:
+        """Retrieve and analyze competitive intelligence documents"""
+        
+        # Use ChromaDB for semantic search
+        search_results = self.chroma_manager.semantic_search(
+            query=query, 
+            collection_names=["market","competitive"],
+            n_results=8
+        )
+        
+        if not search_results:
+            return {
+                "agent": self.name,
+                "documents_found": 0,
+                "analysis": "No competitive intelligence documents found matching the query.",
+                "competitive_insights": [],
+                "sources": [],
+                "retrieval_method": "semantic_search"
+            }
+        
+        # Store retrieved documents in system state
+        stored_docs = []
+        relevance_scores = []
+
+        for result in search_results:
+            # Check if this document is already stored
+            existing_doc_id = None
+            for doc_id, existing_doc in self.system_state.retrieved_documents.items():
+                if existing_doc.source == result["filename"] and existing_doc.retrieval_agent == self.name:
+                    existing_doc_id = doc_id
+                    break
+            
+            if existing_doc_id:
+                relevance_score = max(0.1, 1 - result["min_distance"])
+                if relevance_score > self.system_state.retrieved_documents[existing_doc_id].relevance_score:
+                    self.system_state.retrieved_documents[existing_doc_id].relevance_score = relevance_score
+                stored_docs.append(existing_doc_id)
+                relevance_scores.append(relevance_score)
+            else:
+                doc_id = f"comp_{len(self.system_state.retrieved_documents) + 1}"
+                relevance_score = max(0.1, 1 - result["min_distance"])
+                
+                retrieved_doc = RetrievedDocument(
+                    document_id=doc_id,
+                    source=result["filename"],
+                    content="\n".join([chunk["content"] for chunk in result["best_chunks"]]),
+                    relevance_score=relevance_score,
+                    retrieval_agent=self.name
+                )
+                self.system_state.retrieved_documents[doc_id] = retrieved_doc
+                stored_docs.append(doc_id)
+                relevance_scores.append(relevance_score)
+        
+        # Analyze competitive intelligence content
+        prompt = """
+        You are a competitive intelligence analyst. Analyze the following competitive documents.
+
+        RESEARCH QUERY: {{$query}}
+
+        RETRIEVED COMPETITIVE INTELLIGENCE DOCUMENTS:
+        {{$documents}}
+
+        Please provide:
+        1. Competitive landscape overview and market share analysis
+        2. Key competitor strengths and weaknesses
+        3. Competitive threats and opportunities
+        4. Strategic positioning recommendations
+        5. Market differentiation opportunities
+
+        Focus on competitive dynamics, market positioning, and strategic advantages.
+        Be specific and reference the actual content from the documents.
+        """
+        
+        function = KernelFunctionFromPrompt(
+            function_name="competitive_analysis",
+            plugin_name="competitive",
+            prompt=prompt
+        )
+        
+        documents_text = "\n\n".join([
+            f"=== DOCUMENT: {result['filename']} (Relevance: {relevance_scores[i]:.2f}) ===\n" +
+            "\n".join([chunk["content"] for chunk in result["best_chunks"]])
+            for i, result in enumerate(search_results)
+        ])
+        
+        result = await self.kernel.invoke(
+            function, 
+            query=query,
+            documents=documents_text
+        )
+        
+        self.system_state.retrieval_metrics[self.name] = len(search_results)
+        
+        return {
+            "agent": self.name,
+            "documents_found": len(search_results),
+            "analysis": str(result),
+            "competitive_insights": self._extract_competitive_insights(search_results),
+            "sources": [result["filename"] for result in search_results],
+            "stored_document_ids": stored_docs,
+            "relevance_scores": relevance_scores,
+            "retrieval_method": "semantic_search"
+        }
+    
+    def _extract_competitive_insights(self, documents: List[Dict]) -> List[str]:
+        """Extract competitive insights from documents"""
+        insights = []
+        competitive_terms = ["competition", "competitor", "market share", "competitive", "advantage", "threat", "strength"]
+        
+        for doc in documents[:2]:
+            content = "\n".join([chunk["content"] for chunk in doc["best_chunks"]]).lower()
+            found_terms = [term for term in competitive_terms if term in content]
+            if found_terms:
+                insights.append(f"Competitive factors ({', '.join(found_terms)}) in {doc['filename']}")
+        
+        return insights if insights else ["General competitive analysis conducted"]

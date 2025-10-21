@@ -182,8 +182,33 @@ class BlobStorageConnector:
 - User adoption rate > 60%
 - Customer satisfaction > 4.5/5
 - Revenue growth > 20%
+""",
+            "competitive_analysis_2024.md": """
+# Competitive Analysis 2024
+
+## Market Share Breakdown
+- TechCorp Inc: 35% market share
+- Innovate Solutions: 25% market share  
+- Digital Systems: 20% market share
+- Our Company: 15% market share
+- Others: 5% market share
+
+## Competitor Strengths
+- **TechCorp**: Strong enterprise sales, global presence
+- **Innovate Solutions**: Innovative product features, agile development
+- **Digital Systems**: Cost-effective solutions, strong SMB focus
+
+## Competitive Threats
+- Price erosion in SMB segment
+- New entrants in Asian markets
+- Rapid feature copying by competitors
+
+## Strategic Recommendations
+- Differentiate through AI capabilities
+- Strengthen enterprise partnerships
+- Accelerate mobile platform development
 """
-        }
+    }     
         
         uploaded_count = 0
         for filename, content in sample_docs.items():
