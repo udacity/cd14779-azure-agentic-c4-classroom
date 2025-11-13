@@ -1,0 +1,27 @@
+graph TB
+    User[User/Main Function]
+
+    Orchestrator[Restaurant Orchestrator<br/>Three Orchestration Patterns:<br/>Sequential, Parallel, Conditional]
+
+    subgraph "Restaurant Recommendation Multi-Agent System"
+        Cuisine[Cuisine Agent<br/>🍽️ Cuisine Expert<br/>Semantic Kernel Instance]
+        Location[Location Agent<br/>📍 Location Expert<br/>Semantic Kernel Instance]
+        Price[Price Range Agent<br/>💰 Price Expert<br/>Semantic Kernel Instance]
+    end
+
+    User -->|Dining Request| Orchestrator
+
+    Orchestrator -->|Orchestrate Request| Cuisine
+    Orchestrator -->|Orchestrate Request| Location
+    Orchestrator -->|Orchestrate Request| Price
+
+    Cuisine -.->|Recommendations| Orchestrator
+    Location -.->|Recommendations| Orchestrator
+    Price -.->|Recommendations| Orchestrator
+
+    Orchestrator -.->|Aggregated Results| User
+
+    style Orchestrator fill:#ffd700
+    style Cuisine fill:#e1f5ff
+    style Location fill:#fff4e1
+    style Price fill:#ffe1e1

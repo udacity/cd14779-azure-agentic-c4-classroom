@@ -1,0 +1,20 @@
+graph TB
+    User[User/Main Function]
+
+    subgraph "Smart City Multi-Agent System"
+        Traffic[Traffic Worker Agent<br/>🚦 Traffic Manager<br/>Semantic Kernel Instance]
+        Energy[Energy Worker Agent<br/>⚡ Energy Analyst<br/>Semantic Kernel Instance]
+        Safety[Safety Worker Agent<br/>🚨 Safety Officer<br/>Semantic Kernel Instance]
+    end
+
+    User -->|Scenario Request| Traffic
+    User -->|Scenario Request| Energy
+    User -->|Scenario Request| Safety
+
+    Traffic -.->|Results| User
+    Energy -.->|Results| User
+    Safety -.->|Results| User
+
+    style Traffic fill:#e1f5ff
+    style Energy fill:#fff4e1
+    style Safety fill:#ffe1e1

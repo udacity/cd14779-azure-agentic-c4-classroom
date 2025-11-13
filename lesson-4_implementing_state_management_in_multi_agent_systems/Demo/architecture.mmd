@@ -1,0 +1,27 @@
+graph TB
+    User[User/Book Store System]
+
+    State[Shared Store State<br/>Pydantic Models:<br/>Books, Customers, Orders<br/>Store Balance, Revenue]
+
+    subgraph "Book Store Multi-Agent System"
+        Inventory[Inventory Agent<br/>📚 Inventory Manager<br/>Semantic Kernel Instance]
+        Sales[Sales Agent<br/>💰 Sales Manager<br/>Semantic Kernel Instance]
+        Recommendation[Recommendation Agent<br/>⭐ Recommendation Specialist<br/>Semantic Kernel Instance]
+    end
+
+    User -->|Request| Inventory
+    User -->|Request| Sales
+    User -->|Request| Recommendation
+
+    Inventory <-->|Read/Write State| State
+    Sales <-->|Read/Write State| State
+    Recommendation <-->|Read/Write State| State
+
+    Inventory -.->|Response| User
+    Sales -.->|Response| User
+    Recommendation -.->|Response| User
+
+    style State fill:#ffd700
+    style Inventory fill:#e1f5ff
+    style Sales fill:#fff4e1
+    style Recommendation fill:#ffe1e1

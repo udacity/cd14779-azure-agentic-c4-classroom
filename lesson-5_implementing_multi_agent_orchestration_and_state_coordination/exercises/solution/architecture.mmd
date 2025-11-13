@@ -1,0 +1,34 @@
+graph TB
+    User[User/Coffee Shop System]
+
+    System[Coffee Shop System<br/>Orchestrates workflow &<br/>coordinates agents]
+
+    State[Shared Shop State<br/>Pydantic Models:<br/>Coffee Orders, Inventory<br/>Daily Sales, Menu Items]
+
+    subgraph "Coffee Shop Multi-Agent System"
+        Order[Order Agent<br/>📋 Order Manager<br/>Semantic Kernel Instance]
+        Barista[Barista Agent<br/>☕ Barista Manager<br/>Semantic Kernel Instance]
+        Inventory[Inventory Agent<br/>📦 Inventory Manager<br/>Semantic Kernel Instance]
+    end
+
+    User -->|Customer Request| System
+
+    System -->|Orchestrate workflow| Order
+    System -->|Orchestrate workflow| Barista
+    System -->|Orchestrate workflow| Inventory
+
+    Order <-->|Read/Write State| State
+    Barista <-->|Read/Write State| State
+    Inventory <-->|Read/Write State| State
+
+    Order -.->|Response| System
+    Barista -.->|Response| System
+    Inventory -.->|Response| System
+
+    System -.->|Coordinated Response| User
+
+    style System fill:#ffd700
+    style State fill:#d4edda
+    style Order fill:#e1f5ff
+    style Barista fill:#fff4e1
+    style Inventory fill:#ffe1e1

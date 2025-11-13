@@ -1,0 +1,27 @@
+graph TB
+    User[User/Project Management System]
+
+    State[Shared Project State<br/>Pydantic Models:<br/>Tasks, Team Members<br/>Project Timeline, Resources]
+
+    subgraph "Project Management Multi-Agent System"
+        Task[Task Agent<br/>✅ Task Manager<br/>Semantic Kernel Instance]
+        Resource[Resource Agent<br/>👥 Resource Manager<br/>Semantic Kernel Instance]
+        Progress[Progress Agent<br/>📊 Progress Tracker<br/>Semantic Kernel Instance]
+    end
+
+    User -->|Request| Task
+    User -->|Request| Resource
+    User -->|Request| Progress
+
+    Task <-->|Read/Write State| State
+    Resource <-->|Read/Write State| State
+    Progress <-->|Read/Write State| State
+
+    Task -.->|Response| User
+    Resource -.->|Response| User
+    Progress -.->|Response| User
+
+    style State fill:#ffd700
+    style Task fill:#e1f5ff
+    style Resource fill:#fff4e1
+    style Progress fill:#ffe1e1

@@ -1,0 +1,58 @@
+graph TB
+    User[User/Multi-Agent RAG System]
+
+    System[Multi-Agent RAG System<br/>Coordinates retrieval &<br/>synthesis workflow]
+
+    State[Shared RAG State<br/>Pydantic Model:<br/>Research Context<br/>Retrieved Documents]
+
+    subgraph "Data Sources"
+        Blob[Blob Storage Connector<br/>Azure Blob Storage]
+        Chroma[ChromaDB Manager<br/>Vector Store]
+    end
+
+    subgraph "Retrieval Agents"
+        Financial[Financial Retrieval Agent<br/>💰 Financial Analyst<br/>Semantic Kernel Instance]
+        Technical[Technical Retrieval Agent<br/>🔧 Technical Analyst<br/>Semantic Kernel Instance]
+        Market[Market Retrieval Agent<br/>📈 Market Analyst<br/>Semantic Kernel Instance]
+    end
+
+    Synthesis[Synthesis Agent<br/>📝 Synthesizer<br/>Semantic Kernel Instance]
+
+    User -->|Research Topic| System
+
+    System -->|Retrieve relevant docs| Financial
+    System -->|Retrieve relevant docs| Technical
+    System -->|Retrieve relevant docs| Market
+
+    Financial -.->|Query vectors| Chroma
+    Technical -.->|Query vectors| Chroma
+    Market -.->|Query vectors| Chroma
+
+    Chroma -.->|Fetch content| Blob
+    Blob -.->|Document content| Chroma
+
+    Chroma -.->|Relevant chunks| Financial
+    Chroma -.->|Relevant chunks| Technical
+    Chroma -.->|Relevant chunks| Market
+
+    Financial -->|Update state| State
+    Technical -->|Update state| State
+    Market -->|Update state| State
+
+    Financial -.->|Retrieved data| System
+    Technical -.->|Retrieved data| System
+    Market -.->|Retrieved data| System
+
+    System -->|Synthesize findings| Synthesis
+
+    Synthesis -->|Read state| State
+    Synthesis -.->|Final Report| User
+
+    style System fill:#ffd700
+    style State fill:#d4edda
+    style Blob fill:#cce5ff
+    style Chroma fill:#cce5ff
+    style Financial fill:#e1f5ff
+    style Technical fill:#fff4e1
+    style Market fill:#ffe1e1
+    style Synthesis fill:#e1ffe1
