@@ -11,6 +11,19 @@ This enhanced smart city monitoring system demonstrates advanced multi-agent arc
 
 ---
 
+## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+The diagram illustrates the enhanced multi-agent system architecture:
+- **User/Main Function** sends monitoring requests to the **City Coordinator**
+- **City Coordinator** analyzes relevance and orchestrates the workflow
+- **Four Worker Agents** (Traffic, Energy, Safety, Environment) process requests
+- **Shared State** allows agents to coordinate through the coordinator
+- Each agent returns analysis to the coordinator, which aggregates results for the user
+
+---
+
 ## 🏗️ Architecture Enhancements
 
 ### 1. Structured Prompt Engineering

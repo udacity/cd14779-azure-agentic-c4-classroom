@@ -4,6 +4,12 @@
 
 This complete restaurant recommendation system demonstrates a working **multi-agent architecture** with three specialized agents and three orchestration patterns.
 
+## System Architecture
+
+![Architecture Diagram](architecture.png)
+
+This diagram shows the restaurant recommendation system architecture with three specialized agents (Cuisine, Location, and Price) orchestrated through sequential, parallel, and conditional execution patterns to provide comprehensive dining recommendations.
+
 ---
 
 ## 🏗️ System Architecture

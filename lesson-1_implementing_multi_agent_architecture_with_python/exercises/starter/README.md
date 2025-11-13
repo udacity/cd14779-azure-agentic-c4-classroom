@@ -12,6 +12,20 @@ This exercise will help you practice:
 
 ---
 
+## 🏗️ Target System Architecture
+
+![Architecture Diagram](architecture.png)
+
+The diagram shows the target architecture you'll be building:
+- **User/Main Function** sends monitoring requests to the **City Coordinator**
+- **City Coordinator** analyzes relevance and orchestrates the workflow
+- **Four Worker Agents** (Traffic, Energy, Safety, Environment) process requests
+- Each agent returns analysis to the coordinator, which aggregates results for the user
+
+Your tasks will enhance the existing 3-agent system to match this 4-agent coordinated architecture.
+
+---
+
 ## 📋 Exercise Tasks
 
 Complete the following **TODOs** in the starter code:

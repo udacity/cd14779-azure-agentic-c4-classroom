@@ -3,7 +3,13 @@
 ## 🎯 Exercise Overview
 
 Transform this starter code into a complete **hospital triage system with Azure SQL Server integration**!
-You’ll implement intelligent routing that directs patient requests to the appropriate medical specialists and integrates with a real database.
+You'll implement intelligent routing that directs patient requests to the appropriate medical specialists and integrates with a real database.
+
+## System Architecture
+
+![Architecture Diagram](architecture.png)
+
+This diagram depicts the target hospital triage system architecture featuring intelligent patient request routing to specialized medical agents with integrated Azure SQL Server data connector for patient records and visit history management.
 
 ---
 

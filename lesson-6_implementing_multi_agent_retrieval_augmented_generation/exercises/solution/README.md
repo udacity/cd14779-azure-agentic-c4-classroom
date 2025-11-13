@@ -4,6 +4,16 @@
 
 A sophisticated multi-agent Retrieval-Augmented Generation system that now includes **Competitive Intelligence** capabilities, providing comprehensive business intelligence across financial, technical, market, and competitive domains.
 
+---
+
+## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+Enhanced RAG system with four retrieval agents (Financial, Technical, Market, Competitive Intelligence) and synthesis agent for comprehensive research analysis, integrated with ChromaDB and Azure Blob Storage.
+
+---
+
 ## 📋 System Workflow
 
 ### 🔄 Complete Data Flow

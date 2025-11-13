@@ -1,5 +1,13 @@
 # 🎯 Exercise Instructions
 
+## 🏗️ Target System Architecture
+
+![Architecture Diagram](architecture.png)
+
+Target architecture showing the multi-agent RAG system you'll build with retrieval agents (Financial, Technical, Market, Competitive Intelligence), synthesis agent, and vector database integration with ChromaDB and Azure Blob Storage.
+
+---
+
 ## Step 1: Implement the Competitive Intelligence Agent
 - Complete the `CompetitiveIntelligenceAgent` class in **rag_agents.py**  
 - Follow the patterns from existing agents  

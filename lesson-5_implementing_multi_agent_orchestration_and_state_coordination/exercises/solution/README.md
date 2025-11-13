@@ -6,6 +6,15 @@ This solution demonstrates a **complete multi-agent coffee shop system** featuri
 
 ---
 
+
+## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+Coffee shop system with orchestrator coordinating three agents (Order, Barista, Inventory) sharing state for end-to-end order fulfillment.
+
+---
+
 ## 🏗️ Architecture
 
 ### 1️⃣ Data Models

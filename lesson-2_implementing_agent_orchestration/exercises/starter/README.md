@@ -3,7 +3,13 @@
 ## 🎯 Exercise Overview
 
 Transform this starter code into a complete **multi-agent restaurant recommendation system**!
-You’ll implement missing agents and orchestration patterns to create a smart dining advisor.
+You'll implement missing agents and orchestration patterns to create a smart dining advisor.
+
+## System Architecture
+
+![Architecture Diagram](architecture.png)
+
+This diagram depicts the target restaurant recommendation system with three specialized agents coordinated through sequential, parallel, and conditional orchestration patterns for intelligent dining recommendations.
 
 ---
 

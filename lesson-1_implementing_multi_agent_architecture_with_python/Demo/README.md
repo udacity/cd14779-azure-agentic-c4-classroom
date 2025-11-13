@@ -8,6 +8,18 @@ The system simulates how different city specialists (Traffic, Energy, Safety) an
 
 ---
 
+## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+The diagram illustrates the multi-agent system architecture:
+- **User/Main Function** sends scenario requests to all worker agents
+- **Three Worker Agents** (Traffic, Energy, Safety) each process requests independently in parallel
+- Each agent has its own **Semantic Kernel Instance** for AI interactions
+- All agents return their analysis results to the user
+
+---
+
 ## 🚦 Workers (Specialized Agents)
 
 The project defines a base class and three specialized agents:

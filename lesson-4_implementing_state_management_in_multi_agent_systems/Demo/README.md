@@ -12,6 +12,15 @@ This demo teaches you how to:
 
 ---
 
+
+## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+Book store system with three agents (Inventory, Sales, Recommendation) sharing state through Pydantic models for coordinated inventory and customer management.
+
+---
+
 ## 🏗️ System Architecture
 
 ### 🧩 Shared State Management

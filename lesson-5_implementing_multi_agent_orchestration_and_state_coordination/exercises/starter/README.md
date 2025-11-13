@@ -3,6 +3,16 @@
 ## 🎯 Exercise Objective
 Implement a multi-agent coffee shop system that coordinates order processing, resource management, and inventory tracking using state coordination techniques.
 
+---
+
+## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+Target architecture showing the coffee shop system you'll build combining orchestration and shared state management with three agents (Order, Barista, Inventory) coordinated through a system orchestrator.
+
+---
+
 ## 📋 Requirements
 
 ### 1. Data Models (Pydantic)

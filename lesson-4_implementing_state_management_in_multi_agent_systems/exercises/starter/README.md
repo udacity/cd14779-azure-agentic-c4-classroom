@@ -7,6 +7,15 @@ You'll implement **state management with Pydantic models** and create **speciali
 
 ---
 
+
+## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+Target architecture showing the project management system you'll build with shared state management across multiple agents.
+
+---
+
 ## 📋 Exercise Tasks
 
 ### 🧱 Task 1: Implement Pydantic Models

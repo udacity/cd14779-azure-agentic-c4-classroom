@@ -13,7 +13,15 @@ A sophisticated multi-agent Retrieval-Augmented Generation (RAG) system that lev
 - **⚡ Parallel Processing**: Asynchronous execution for optimal performance
 - **📈 Performance Metrics**: Detailed analytics on retrieval effectiveness and agent performance
 
+---
+
 ## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+Multi-agent RAG system with three retrieval agents (Financial, Technical, Market) and synthesis agent, using ChromaDB for vector search and Azure Blob Storage for document management.
+
+### Detailed Architecture
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐

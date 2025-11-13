@@ -6,6 +6,15 @@ This complete **project management system** demonstrates sophisticated **state m
 
 ---
 
+
+## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+Project management system with three agents (Task, Resource, Progress) sharing state for coordinated project tracking and resource allocation.
+
+---
+
 ## 🏗️ System Architecture
 
 ### 🧩 Three Core Pydantic Models

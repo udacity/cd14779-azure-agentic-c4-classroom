@@ -15,7 +15,13 @@ A clean, easy-to-understand demo showing three different ways to coordinate mult
 - When to use each pattern
 - Basic multi-agent system design
 
+---
+
 ## 🏗️ System Architecture
+
+![Architecture Diagram](architecture.png)
+
+The diagram illustrates the travel planning orchestrator system with three specialized agents (Destination, Flight, and Accommodation) coordinated through sequential, parallel, and conditional orchestration patterns.
 
 ### Three Specialist Agents
 

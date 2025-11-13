@@ -4,6 +4,12 @@
 
 This demo showcases an **intelligent routing system** for a bank office that automatically directs customer requests to the most appropriate **specialist agent** based on **content analysis** and **urgency detection**.
 
+## System Architecture
+
+![Architecture Diagram](architecture.png)
+
+This diagram illustrates the bank office routing system with an intelligent routing agent that analyzes customer requests and directs them to specialized agents (Account, Loan, Card, Emergency) integrated with a data connector for Azure SQL Server access.
+
 ---
 
 ## 🏗️ System Architecture
