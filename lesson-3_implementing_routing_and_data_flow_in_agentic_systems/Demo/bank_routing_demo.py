@@ -1,14 +1,15 @@
 import asyncio
 import os
-from semantic_kernel import Kernel
 import pyodbc
 from contextlib import contextmanager
 from typing import List, Dict, Optional
+from semantic_kernel import Kernel
+from semantic_kernel.agents import ChatCompletionAgent
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
-from semantic_kernel.functions.kernel_function_from_prompt import KernelFunctionFromPrompt
+from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
-load_dotenv("../../.env")
 
+load_dotenv("../../.env")
 
 class BankDataConnector:
     """Data connector for bank transactions from Azure SQL Server"""
@@ -21,9 +22,9 @@ class BankDataConnector:
         # Load initial data from database
         self.transactions_data = self._load_transaction_data()
     
-    # Database connection helper for Azure SQL Server
     @contextmanager
     def get_db_connection(self):
+        """Database connection helper for Azure SQL Server"""
         conn = pyodbc.connect(self.connection_string)
         try:
             yield conn
@@ -163,238 +164,143 @@ class BankDataConnector:
         except Exception as e:
             print(f"❌ Error getting recent transactions: {e}")
             return []
-        
-class BankAgent:
-    """Base class for all bank specialist agents"""
+
+class BankAgentManager:
+    """Complete banking agent system with intelligent routing and Azure SQL integration"""
     
-    def __init__(self, name: str, specialty: str):
-        self.name = name
-        self.specialty = specialty
+    def __init__(self):
+        # Shared kernel instance for optimal resource usage
         self.kernel = Kernel()
+        
+        # Azure OpenAI service configuration
+        self.kernel.add_service(
+            AzureChatCompletion(
+                service_id="azure_banking_chat",
+                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+            )
+        )
+        
+        # Initialize data connector for Azure SQL database
         self.data_connector = BankDataConnector()
         
-        self.kernel.add_service(
-            AzureChatCompletion(
-                service_id="chat_completion",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+        # Initialize specialized banking agents with detailed instructions
+        self.agents = {
+            "account": ChatCompletionAgent(
+                kernel=self.kernel,
+                name="Account_Specialist",
+                description="Specialist in account balances and transaction inquiries",
+                instructions="""You are a bank account specialist. Help customers with account-related inquiries.
+
+                Always provide:
+                - Clear explanation of account status and balances
+                - Recent transaction summaries with context
+                - Answers to specific account questions
+                - Next steps if action is needed
+
+                Use transaction data from the database to provide accurate, data-driven responses.
+                Be helpful, professional, and focus on security and accuracy."""
+            ),
+            "loan": ChatCompletionAgent(
+                kernel=self.kernel,
+                name="Loan_Specialist",
+                description="Specialist in loan applications and financing",
+                instructions="""You are a bank loan specialist. Assist customers with loan inquiries and applications.
+
+                Always include:
+                - Information about various loan options and products
+                - Eligibility requirements and qualification criteria
+                - Application process explanation with timelines
+                - Interest rate information and payment calculations
+                - Documentation requirements and next steps
+
+                Provide clear, accurate information about loan products and processes."""
+            ),
+            "card": ChatCompletionAgent(
+                kernel=self.kernel,
+                name="Card_Specialist", 
+                description="Specialist in credit and debit card services",
+                instructions="""You are a bank card specialist. Handle card-related inquiries and issues.
+
+                Always provide:
+                - Card service information and features
+                - Issue resolution steps for problems
+                - Replacement and renewal processes
+                - Security recommendations and fraud prevention
+                - Activation and usage guidance
+
+                Focus on quick resolution, security, and customer satisfaction."""
+            ),
+            "emergency": ChatCompletionAgent(
+                kernel=self.kernel,
+                name="Emergency_Specialist",
+                description="Specialist in urgent banking issues and security concerns",
+                instructions="""You are an emergency banking specialist. Handle urgent requests immediately.
+
+                This is HIGH PRIORITY. Always provide:
+                - Immediate action steps for urgent situations
+                - Emergency contact information and procedures
+                - Fraud prevention and security measures
+                - Account protection steps and temporary holds
+                - Clear timelines for resolution and follow-up
+
+                Respond with URGENCY and provide clear emergency procedures.
+                Focus on security, speed, and customer reassurance."""
+            ),
+            "router": ChatCompletionAgent(
+                kernel=self.kernel,
+                name="Routing_Agent",
+                description="Intelligent router for banking request distribution",
+                instructions="""You are an intelligent routing agent. Analyze banking requests and route to appropriate specialists.
+
+                Analyze each request and determine:
+                1. Which specialist should handle it (account/loan/card/emergency)
+                2. The urgency level (Low/Medium/High/Emergency)
+                3. Brief reasoning for your decision
+
+                Specialist Responsibilities:
+                - account: Account balances, transactions, account information, transfers
+                - loan: Loan applications, mortgages, personal loans, interest rates, financing
+                - card: Credit/debit card issues, lost cards, card applications, disputes
+                - emergency: Fraud, stolen cards, urgent account issues, security breaches
+
+                Urgency Guidelines:
+                - Low: General inquiries, information requests, product questions
+                - Medium: Service requests, application status, routine issues
+                - High: Time-sensitive issues, payment problems, card declines
+                - Emergency: Fraud, security breaches, lost/stolen cards, unauthorized transactions
+
+                Respond in this exact format:
+                Specialist: [account/loan/card/emergency]
+                Urgency: [Low/Medium/High/Emergency]
+                Reasoning: [brief explanation]"""
             )
-        )
-    
-    async def process_request(self, request: str) -> str:
-        """Process bank request - to be implemented by subclasses"""
-        raise NotImplementedError("Subclasses must implement this method")
-
-class AccountAgent(BankAgent):
-    """Agent specializing in account inquiries and balance checks"""
-    
-    def __init__(self):
-        super().__init__("Account Specialist", "Account balances and information")
-    
-    async def process_request(self, request: str) -> str:
-        """Handle account-related inquiries"""
-        
-        prompt = """
-        You are a bank account specialist. Help the customer with their account inquiry.
-
-        CUSTOMER REQUEST: {{$request}}
-
-        Available transaction data will be provided separately.
-
-        Please provide:
-        - Clear explanation of account status
-        - Recent transaction summary if relevant
-        - Answers to specific account questions
-        - Next steps if action is needed
-
-        Be helpful and professional.
-        """
-        
-        function = KernelFunctionFromPrompt(
-            function_name="account_inquiry",
-            plugin_name="account",
-            prompt=prompt
-        )
-        
-        # Get transaction data for context
-        account_transactions = self.data_connector.get_transactions("ACC001")  # Default account for demo
-        transaction_context = f"Recent transactions: {account_transactions}"
-        
-        result = await self.kernel.invoke(
-            function, 
-            request=request,
-            transaction_data=transaction_context
-        )
-        
-        return f"🏦 **Account Assistance**\n\n{result}"
-
-class LoanAgent(BankAgent):
-    """Agent specializing in loan inquiries and applications"""
-    
-    def __init__(self):
-        super().__init__("Loan Specialist", "Loan applications and information")
-    
-    async def process_request(self, request: str) -> str:
-        """Handle loan-related inquiries"""
-        
-        prompt = """
-        You are a bank loan specialist. Help the customer with their loan inquiry.
-
-        CUSTOMER REQUEST: {{$request}}
-
-        Please provide:
-        - Information about loan options
-        - Eligibility requirements
-        - Application process explanation
-        - Interest rate information if available
-        - Next steps for application
-
-        Be clear about requirements and helpful with next steps.
-        """
-        
-        function = KernelFunctionFromPrompt(
-            function_name="loan_inquiry",
-            plugin_name="loan",
-            prompt=prompt
-        )
-        
-        result = await self.kernel.invoke(function, request=request)
-        return f"💰 **Loan Assistance**\n\n{result}"
-
-class CardAgent(BankAgent):
-    """Agent specializing in credit/debit card services"""
-    
-    def __init__(self):
-        super().__init__("Card Specialist", "Credit and debit card services")
-    
-    async def process_request(self, request: str) -> str:
-        """Handle card-related inquiries"""
-        
-        prompt = """
-        You are a bank card specialist. Help the customer with their card inquiry.
-
-        CUSTOMER REQUEST: {{$request}}
-
-        Please provide:
-        - Card service information
-        - Issue resolution steps
-        - Replacement process if needed
-        - Security recommendations
-        - Next steps for the customer
-
-        Focus on quick resolution and security.
-        """
-        
-        function = KernelFunctionFromPrompt(
-            function_name="card_inquiry",
-            plugin_name="card",
-            prompt=prompt
-        )
-        
-        result = await self.kernel.invoke(function, request=request)
-        return f"💳 **Card Assistance**\n\n{result}"
-
-class EmergencyAgent(BankAgent):
-    """Agent specializing in urgent banking issues"""
-    
-    def __init__(self):
-        super().__init__("Emergency Specialist", "Urgent banking issues")
-    
-    async def process_request(self, request: str) -> str:
-        """Handle urgent banking issues"""
-        
-        prompt = """
-        You are an emergency banking specialist. Handle this urgent request immediately.
-
-        URGENT REQUEST: {{$request}}
-
-        This is HIGH PRIORITY. Please provide:
-        - Immediate action steps
-        - Emergency contact information
-        - Fraud prevention measures
-        - Account protection steps
-        - Timeline for resolution
-
-        Respond with URGENCY and provide clear emergency procedures.
-        """
-        
-        function = KernelFunctionFromPrompt(
-            function_name="emergency_assistance",
-            plugin_name="emergency",
-            prompt=prompt
-        )
-        
-        result = await self.kernel.invoke(function, request=request)
-        return f"🚨 **EMERGENCY ASSISTANCE**\n\n{result}"
-
-class RoutingAgent:
-    """Intelligent router that directs requests to appropriate specialists"""
-    
-    def __init__(self):
-        self.specialists = {
-            "account": AccountAgent(),
-            "loan": LoanAgent(),
-            "card": CardAgent(),
-            "emergency": EmergencyAgent()
         }
         
-        self.kernel = Kernel()
-        self.kernel.add_service(
-            AzureChatCompletion(
-                service_id="chat_completion",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
-            )
-        )
-    
-    async def route_request(self, customer_request: str) -> dict:
-        """Analyze request and route to appropriate specialist"""
-        
-        routing_prompt = """
-        Analyze this bank customer request and determine:
-        1. Which specialist should handle it
-        2. The urgency level (Low, Medium, High, Emergency)
-        3. Brief reasoning for your decision
+        self.runtime = InProcessRuntime()
 
-        CUSTOMER REQUEST: {{$request}}
-
-        Available specialists:
-        - account: Account balances, transactions, account information
-        - loan: Loan applications, mortgage, personal loans, interest rates
-        - card: Credit/debit card issues, lost cards, card applications
-        - emergency: Fraud, stolen cards, urgent account issues, security concerns
-
-        Urgency levels:
-        - Low: General inquiries, information requests
-        - Medium: Service requests, application status
-        - High: Time-sensitive issues, payment problems
-        - Emergency: Fraud, security breaches, lost/stolen cards
-
-        Respond in this exact format:
-        Specialist: [account/loan/card/emergency]
-        Urgency: [Low/Medium/High/Emergency]
-        Reasoning: [brief explanation]
-        """
+    async def route_customer_request(self, customer_request: str) -> dict:
+        """Intelligent routing of customer requests to appropriate specialists"""
+        print(f"📥 Customer Request: {customer_request}")
+        print("🔄 Analyzing request and determining routing...")
         
-        routing_function = KernelFunctionFromPrompt(
-            function_name="request_routing",
-            plugin_name="router",
-            prompt=routing_prompt
-        )
+        # Use routing agent to analyze the request
+        routing_prompt = f"CUSTOMER REQUEST: {customer_request}"
         
-        routing_result = await self.kernel.invoke(
-            routing_function, 
-            request=customer_request
-        )
+        routing_response = await self.agents["router"].get_response(routing_prompt)
+        routing_content = str(routing_response.content)
         
-        # Parse the routing decision
-        routing_text = str(routing_result)
-        routing_decision = self._parse_routing_decision(routing_text)
+        # Parse routing decision
+        routing_decision = self._parse_routing_decision(routing_content)
+        
+        print(f"✅ Routing Decision:")
+        print(f"   Specialist: {routing_decision['specialist']}")
+        print(f"   Urgency: {routing_decision['urgency']}")
+        print(f"   Reasoning: {routing_decision['reasoning']}")
         
         return routing_decision
-    
+
     def _parse_routing_decision(self, routing_text: str) -> dict:
         """Parse the routing decision from the AI response"""
         lines = routing_text.strip().split('\n')
@@ -415,31 +321,54 @@ class RoutingAgent:
                 decision["reasoning"] = line.split(':')[1].strip()
         
         return decision
-    
-    async def process_customer_request(self, customer_request: str) -> dict:
-        """Complete routing and processing of customer request"""
+
+    async def process_with_specialist(self, customer_request: str, specialist: str, urgency: str) -> str:
+        """Process customer request with the appropriate specialist"""
+        print(f"🔧 Connecting to {specialist} specialist...")
         
-        print(f"📥 Customer Request: {customer_request}")
-        print("🔄 Analyzing request and determining routing...")
+        # Get relevant transaction data for context
+        accounts = self.data_connector.get_accounts()
+        transaction_context = ""
         
+        if specialist == "account":
+            # Provide transaction data for account inquiries
+            recent_transactions = []
+            for account in accounts[:2]:  # Show data for first 2 accounts
+                transactions = self.data_connector.get_recent_transactions(account, 3)
+                balance = self.data_connector.get_account_balance(account)
+                recent_transactions.append(f"Account {account} (Balance: ${balance:.2f}): {transactions}")
+            
+            transaction_context = f"\n\nACCOUNT DATA CONTEXT:\n" + "\n".join(recent_transactions)
+        
+        # Add urgency context for emergency situations
+        urgency_context = ""
+        if urgency in ["High", "Emergency"]:
+            urgency_context = f"\n\n🚨 URGENCY: {urgency} - Requiring immediate attention"
+        
+        # Process request with specialist agent
+        full_request = f"CUSTOMER REQUEST: {customer_request}{transaction_context}{urgency_context}"
+        
+        specialist_response = await self.agents[specialist].get_response(full_request)
+        
+        return f"🏦 **{specialist.capitalize()} Assistance**\n\n{specialist_response.content}"
+
+    async def handle_customer_request(self, customer_request: str) -> dict:
+        """Complete processing of a customer request"""
         # Step 1: Route the request
-        routing_decision = await self.route_request(customer_request)
-        
-        print(f"✅ Routing Decision:")
-        print(f"   Specialist: {routing_decision['specialist']}")
-        print(f"   Urgency: {routing_decision['urgency']}")
-        print(f"   Reasoning: {routing_decision['reasoning']}")
+        routing_decision = await self.route_customer_request(customer_request)
         
         # Step 2: Process with appropriate specialist
-        specialist_key = routing_decision["specialist"]
-        if specialist_key in self.specialists:
-            print(f"🔧 Connecting to {self.specialists[specialist_key].name}...")
-            specialist_result = await self.specialists[specialist_key].process_request(customer_request)
+        if routing_decision["specialist"] in self.agents:
+            specialist_response = await self.process_with_specialist(
+                customer_request, 
+                routing_decision["specialist"],
+                routing_decision["urgency"]
+            )
             
             return {
                 "routing_decision": routing_decision,
-                "specialist_response": specialist_result,
-                "specialist_name": self.specialists[specialist_key].name
+                "specialist_response": specialist_response,
+                "specialist_name": routing_decision["specialist"].capitalize() + " Specialist"
             }
         else:
             return {
@@ -448,61 +377,69 @@ class RoutingAgent:
                 "specialist_name": "Unknown"
             }
 
-class BankOfficeSystem:
-    """Main bank office system coordinating all agents"""
-    
-    def __init__(self):
-        self.router = RoutingAgent()
-    
-    async def handle_customer_requests(self, requests: list):
-        """Process multiple customer requests"""
-        
-        print("🏦 BANK OFFICE MULTI-AGENT SYSTEM")
-        print("Intelligent Routing and Data Flow Demo")
-        print("=" * 60)
-        
-        for i, request in enumerate(requests, 1):
-            print(f"\n{'#' * 60}")
-            print(f"CUSTOMER REQUEST #{i}")
-            print(f"{'#' * 60}")
-            
-            try:
-                result = await self.router.process_customer_request(request)
-                self.display_result(result)
-                
-                # Small pause between requests
-                await asyncio.sleep(2)
-                
-            except Exception as e:
-                print(f"❌ Error processing request: {e}")
-                continue
-
     def display_result(self, result: dict):
         """Display the processing result"""
         print(f"\n🎯 REQUEST PROCESSING COMPLETE")
         print(f"Handled by: {result['specialist_name']}")
         print(f"Urgency: {result['routing_decision']['urgency']}")
-        print("\n" + "=" * 50)
+        print("\n" + "=" * 60)
         print(f"{result['specialist_response']}")
-        print("=" * 50)
+        print("=" * 60)
 
 async def main():
-    bank_system = BankOfficeSystem()
+    """Main banking system demo"""
+    print("🏦 BANKING MULTI-AGENT SYSTEM - COMPLETE SOLUTION")
+    print("Intelligent Routing and Data Flow with Azure SQL")
+    print("Semantic Kernel 1.37.0 with Modern Agent Framework")
+    print("=" * 70)
     
-    # Sample customer requests
-    customer_requests = [
-        "I want to check my account balance and recent transactions",
-        "I'm interested in applying for a home loan, what are the requirements?",
-        "My credit card was stolen this morning, I need to report it immediately",
-        "Can you help me with a personal loan for $10,000?",
-        "I noticed a suspicious transaction on my account from yesterday",
-        "What's the process to get a new debit card?",
-        "I need to transfer money to another account urgently",
-        "What are your current mortgage interest rates?"
+    # Validate environment setup
+    required_vars = [
+        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
+        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
+        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY",
+        "AZURE_SQL_CONNECTION_STRING"
     ]
     
-    # Process all customer requests
-    await bank_system.handle_customer_requests(customer_requests)
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
+    if missing_vars:
+        print(f"❌ Missing environment variables: {missing_vars}")
+        print("Please check your .env file")
+        return
+    
+    manager = BankAgentManager()
+    
+    # Sample customer requests covering different scenarios
+    customer_requests = [
+        "I want to check my account balance and recent transactions for ACC001",
+        "I'm interested in applying for a home loan, what are the requirements and current rates?",
+        "My credit card was stolen this morning, I need to report it immediately and get a replacement",
+        "Can you help me with a personal loan for $10,000? What's the application process?",
+        "I noticed a suspicious transaction of $300 on my account from yesterday that I don't recognize",
+        "What's the process to get a new debit card and how long does it take?",
+        "I need to transfer $500 to my savings account urgently",
+        "What are your current mortgage interest rates for a 30-year fixed loan?"
+    ]
+    
+    # Process customer requests
+    for i, customer_request in enumerate(customer_requests[:4], 1):
+        print(f"\n{'#' * 70}")
+        print(f"CUSTOMER REQUEST #{i}")
+        print(f"{'#' * 70}")
+        
+        try:
+            result = await manager.handle_customer_request(customer_request)
+            manager.display_result(result)
+            
+            # Brief pause between requests
+            await asyncio.sleep(2)
+            
+        except Exception as e:
+            print(f"❌ Error processing request: {e}")
+            continue
+    
+    print("\n✅ Banking system demo completed successfully!")
 
 if __name__ == "__main__":
     asyncio.run(main())

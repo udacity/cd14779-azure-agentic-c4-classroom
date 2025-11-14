@@ -4,9 +4,11 @@ import pyodbc
 from contextlib import contextmanager
 from typing import Dict, List, Optional
 from semantic_kernel import Kernel
+from semantic_kernel.agents import ChatCompletionAgent
+from semantic_kernel.agents.runtime import InProcessRuntime
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
-from semantic_kernel.functions.kernel_function_from_prompt import KernelFunctionFromPrompt
 from dotenv import load_dotenv
+
 load_dotenv("../../../.env")
 
 class PatientDataConnector:
@@ -20,9 +22,9 @@ class PatientDataConnector:
         # Load initial data from database
         self.patient_records = self._load_patient_data()
     
-    # Database connection helper for Azure SQL Server
     @contextmanager
     def get_db_connection(self):
+        """Database connection helper for Azure SQL Server"""
         conn = pyodbc.connect(self.connection_string)
         try:
             yield conn
@@ -137,254 +139,126 @@ class PatientDataConnector:
             print(f"❌ Error adding patient visit: {e}")
             return False
 
-class MedicalAgent:
-    """Base class for all medical specialist agents"""
+class MedicalAgentManager:
+    """Complete medical triage system with intelligent routing and Azure SQL integration"""
     
-    def __init__(self, name: str, specialty: str):
-        self.name = name
-        self.specialty = specialty
+    def __init__(self):
+        # Shared kernel instance for optimal resource usage
         self.kernel = Kernel()
+        
+        # Azure OpenAI service configuration
+        self.kernel.add_service(
+            AzureChatCompletion(
+                service_id="azure_medical_chat",
+                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+            )
+        )
+        
+        # Initialize data connector with Azure SQL connection
         self.data_connector = PatientDataConnector()
         
-        self.kernel.add_service(
-            AzureChatCompletion(
-                service_id="chat_completion",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+        # Initialize specialized medical agents with detailed instructions
+        self.agents = {
+            "general": ChatCompletionAgent(
+                kernel=self.kernel,
+                name="General_Practitioner",
+                description="Specialist in general health and routine care",
+                instructions="""You are a general practitioner. Help patients with general health concerns.
+
+                Always provide:
+                - Professional symptom assessment and likely causes
+                - Initial care recommendations and home remedies
+                - Clear guidance on when to seek urgent care
+                - Follow-up instructions and monitoring advice
+                - Referral suggestions if specialist care is needed
+
+                Use patient data from the database when available to provide personalized responses.
+                Be empathetic, professional, and focus on patient safety."""
+            ),
+            "emergency": ChatCompletionAgent(
+                kernel=self.kernel,
+                name="Emergency_Specialist",
+                description="Specialist in urgent and critical care situations",
+                instructions="""You are an emergency medicine specialist. Handle urgent medical situations immediately.
+
+                This is HIGH PRIORITY. Always provide:
+                - Immediate action steps and first aid instructions
+                - Clear emergency warning signs and red flags
+                - Guidance on when to call emergency services
+                - Urgent care facility recommendations
+                - Critical monitoring instructions while waiting for help
+
+                Respond with URGENCY and prioritize patient safety above all else.
+                Focus on life-threatening conditions and immediate risks."""
+            ),
+            "pediatric": ChatCompletionAgent(
+                kernel=self.kernel,
+                name="Pediatric_Specialist",
+                description="Specialist in children's health and development",
+                instructions="""You are a pediatric specialist. Handle children's health concerns with age-appropriate care.
+
+                Always provide:
+                - Age-specific symptom assessment and considerations
+                - Pediatric-appropriate care recommendations
+                - Child-specific emergency warning signs
+                - Growth and development context
+                - Parent guidance and monitoring instructions
+
+                Focus on child safety, developmental stages, and parent education."""
+            ),
+            "router": ChatCompletionAgent(
+                kernel=self.kernel,
+                name="Medical_Routing_Agent",
+                description="Intelligent router for medical request distribution",
+                instructions="""You are an intelligent medical routing agent. Analyze patient requests and route to appropriate specialists.
+
+                Analyze each request and determine:
+                1. Which specialist should handle it (general/emergency/pediatric)
+                2. The urgency level (Routine/Urgent/Emergency)
+                3. Brief medical reasoning for your decision
+
+                Specialist Responsibilities:
+                - general: Routine symptoms, chronic conditions, general health questions
+                - emergency: Severe pain, injuries, breathing difficulties, chest pain, heavy bleeding
+                - pediatric: Children's health issues, baby/toddler concerns, pediatric-specific conditions
+
+                Urgency Guidelines:
+                - Routine: Non-urgent symptoms, routine follow-ups, general health questions
+                - Urgent: Needs medical attention within 24 hours, moderate symptoms
+                - Emergency: Life-threatening, severe symptoms requiring immediate care
+
+                Respond in this exact format:
+                Specialist: [general/emergency/pediatric]
+                Urgency: [Routine/Urgent/Emergency]
+                Reasoning: [brief medical explanation]"""
             )
-        )
-    
-    async def process_request(self, request: str) -> str:
-        """Process medical request - to be implemented by subclasses"""
-        raise NotImplementedError("Subclasses must implement this method")
-
-class GeneralPracticeAgent(MedicalAgent):
-    """Agent specializing in general health concerns"""
-    
-    def __init__(self):
-        super().__init__("General Practitioner", "General health and routine care")
-    
-    async def process_request(self, request: str) -> str:
-        """Handle general health inquiries"""
-        
-        prompt = """
-        You are an experienced general practitioner. Analyze this patient's symptoms and provide professional medical advice.
-
-        PATIENT REQUEST: {{$request}}
-
-        PATIENT HISTORY: {{$patient_history}}
-
-        Please provide:
-        🩺 SYMPTOM ASSESSMENT:
-        - Likely causes based on symptoms
-        - Severity evaluation
-        
-        💊 INITIAL CARE RECOMMENDATIONS:
-        - Home care instructions
-        - Over-the-counter suggestions if appropriate
-        - Self-monitoring advice
-        
-        🚨 WHEN TO SEEK URGENT CARE:
-        - Red flag symptoms to watch for
-        - When to contact healthcare provider
-        
-        📅 FOLLOW-UP INSTRUCTIONS:
-        - Timeline for improvement
-        - When to schedule follow-up
-
-        Always include: "If symptoms worsen or you have concerns, contact your healthcare provider."
-        """
-        
-        function = KernelFunctionFromPrompt(
-            function_name="general_consultation",
-            plugin_name="general_practice",
-            prompt=prompt
-        )
-        
-        # Try to extract patient name and get history
-        patient_history = "No patient history available"
-        # Simple name extraction (in real scenario, use more sophisticated NLP)
-        if "my name is" in request.lower():
-            name_part = request.lower().split("my name is")[1].split(".")[0].strip()
-            patient_history = self.data_connector.get_patient_history(name_part)
-        
-        result = await self.kernel.invoke(
-            function, 
-            request=request,
-            patient_history=patient_history
-        )
-        
-        # Log the consultation
-        self.data_connector.add_patient_visit("Unknown Patient", request, "General Consultation")
-        
-        return f"🩺 **General Practice Consultation**\n\n{result}"
-
-class EmergencyAgent(MedicalAgent):
-    """Agent specializing in emergency situations"""
-    
-    def __init__(self):
-        super().__init__("Emergency Specialist", "Urgent and critical care")
-    
-    async def process_request(self, request: str) -> str:
-        """Handle emergency medical situations"""
-        
-        prompt = """
-        You are an emergency medicine specialist. Evaluate this urgent medical situation and provide emergency guidance.
-
-        URGENT REQUEST: {{$request}}
-
-        Please provide:
-        🚨 IMMEDIATE ACTION ASSESSMENT:
-        - Severity level (Mild/Moderate/Severe/Critical)
-        - Time sensitivity
-        
-        🆘 EMERGENCY RESPONSE:
-        - Immediate first steps
-        - When to call emergency services
-        - What to do while waiting for help
-        
-        ⚠️ WARNING SIGNS:
-        - Critical symptoms to monitor
-        - When situation becomes life-threatening
-        
-        🏥 URGENT CARE RECOMMENDATIONS:
-        - Where to seek care (ER, urgent care, telehealth)
-        - Timeline for seeking medical attention
-
-        Always start with: "THIS IS URGENT MEDICAL ADVICE:"
-        """
-        
-        function = KernelFunctionFromPrompt(
-            function_name="emergency_care",
-            plugin_name="emergency",
-            prompt=prompt
-        )
-        
-        result = await self.kernel.invoke(function, request=request)
-        
-        # Log emergency consultation
-        self.data_connector.add_patient_visit("Emergency Patient", request, "Emergency Consultation")
-        
-        return f"🚨 **Emergency Care**\n\n{result}"
-
-class PediatricAgent(MedicalAgent):
-    """Agent specializing in children's health issues"""
-    
-    def __init__(self):
-        super().__init__("Pediatric Specialist", "Children's health and development")
-    
-    async def process_request(self, request: str) -> str:
-        """Handle pediatric health inquiries"""
-        
-        prompt = """
-        You are a pediatric specialist. Provide age-appropriate medical advice for this child's health concern.
-
-        PEDIATRIC REQUEST: {{$request}}
-
-        Please provide:
-        👶 PEDIATRIC ASSESSMENT:
-        - Age-specific considerations
-        - Common childhood illness evaluation
-        - Developmental stage relevance
-        
-        🌡️ PEDIATRIC CARE GUIDANCE:
-        - Child-appropriate home care
-        - Dosing considerations if mentioned
-        - Comfort measures for children
-        
-        🚨 PEDIATRIC RED FLAGS:
-        - Emergency signs in children
-        - When to seek immediate care
-        - Dehydration warning signs
-        
-        📞 PEDIATRIC FOLLOW-UP:
-        - When to contact pediatrician
-        - Monitoring guidelines for parents
-        - Expected recovery timeline
-
-        Focus on child-specific concerns and parent guidance.
-        """
-        
-        function = KernelFunctionFromPrompt(
-            function_name="pediatric_consultation",
-            plugin_name="pediatrics",
-            prompt=prompt
-        )
-        
-        result = await self.kernel.invoke(function, request=request)
-        
-        # Log pediatric consultation
-        self.data_connector.add_patient_visit("Pediatric Patient", request, "Pediatric Consultation")
-        
-        return f"👶 **Pediatric Consultation**\n\n{result}"
-
-class TriageRouter:
-    """Intelligent router that directs patient requests to appropriate specialists"""
-    
-    def __init__(self):
-        self.specialists = {
-            "general": GeneralPracticeAgent(),
-            "emergency": EmergencyAgent(),
-            "pediatric": PediatricAgent()
         }
         
-        self.kernel = Kernel()
-        self.kernel.add_service(
-            AzureChatCompletion(
-                service_id="chat_completion",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
-            )
-        )
-    
+        self.runtime = InProcessRuntime()
+
     async def route_patient_request(self, patient_request: str) -> dict:
-        """Analyze patient request and route to appropriate specialist"""
+        """Intelligent routing of patient requests to appropriate specialists"""
+        print(f"📥 Patient Request: {patient_request}")
+        print("🔄 Analyzing symptoms and determining routing...")
         
-        routing_prompt = """
-        You are a medical triage specialist. Analyze this patient request and determine the appropriate routing.
-
-        PATIENT REQUEST: {{$request}}
-
-        Available specialists:
-        - general: Routine symptoms, chronic conditions, general health concerns
-        - pediatric: Children's health (mentions of child, baby, toddler, pediatric)
-        - emergency: Severe pain, injuries, breathing difficulties, chest pain, bleeding
-
-        Urgency levels:
-        - Routine: Non-urgent symptoms, routine follow-ups
-        - Urgent: Needs attention within 24 hours
-        - Emergency: Needs immediate medical attention
-
-        Consider:
-        - Patient age mentions (child, baby, pediatric → pediatric)
-        - Symptom severity (severe, intense, unbearable → emergency)
-        - Specific concerning symptoms (chest pain, difficulty breathing → emergency)
-
-        Respond in this exact format:
-        Specialist: [general/pediatric/emergency]
-        Urgency: [Routine/Urgent/Emergency]
-        Reasoning: [brief medical reasoning for this decision]
-        """
+        # Use routing agent to analyze the request
+        routing_prompt = f"PATIENT REQUEST: {patient_request}"
         
-        routing_function = KernelFunctionFromPrompt(
-            function_name="medical_routing",
-            plugin_name="triage",
-            prompt=routing_prompt
-        )
+        routing_response = await self.agents["router"].get_response(routing_prompt)
+        routing_content = str(routing_response.content)
         
-        routing_result = await self.kernel.invoke(
-            routing_function, 
-            request=patient_request
-        )
+        # Parse routing decision
+        routing_decision = self._parse_routing_decision(routing_content)
         
-        # Parse the routing decision
-        routing_text = str(routing_result)
-        routing_decision = self._parse_routing_decision(routing_text)
+        print(f"✅ Triage Decision:")
+        print(f"   Specialist: {routing_decision['specialist']}")
+        print(f"   Urgency: {routing_decision['urgency']}")
+        print(f"   Reasoning: {routing_decision['reasoning']}")
         
         return routing_decision
-    
+
     def _parse_routing_decision(self, routing_text: str) -> dict:
         """Parse the routing decision from the AI response"""
         lines = routing_text.strip().split('\n')
@@ -405,108 +279,121 @@ class TriageRouter:
                 decision["reasoning"] = line.split(':')[1].strip()
         
         return decision
-    
-    async def process_patient_request(self, patient_request: str) -> dict:
-        """Complete routing and processing of patient request"""
+
+    async def process_with_specialist(self, patient_request: str, specialist: str, urgency: str) -> str:
+        """Process patient request with the appropriate specialist"""
+        print(f"🔧 Connecting to {specialist} specialist...")
         
-        print(f"📥 Patient Request: {patient_request}")
-        print("🔄 Analyzing symptoms and determining routing...")
+        # Try to extract patient name and get history using simple pattern matching
+        patient_context = ""
+        if "my name is" in patient_request.lower():
+            try:
+                name_part = patient_request.lower().split("my name is")[1].split(".")[0].strip()
+                patient_name = name_part.title()
+                patient_history = self.data_connector.get_patient_history(patient_name)
+                patient_context = f"\n\nPATIENT CONTEXT: {patient_history}"
+            except (IndexError, AttributeError):
+                pass
         
+        # Add urgency context for emergency situations
+        urgency_context = ""
+        if urgency in ["Urgent", "Emergency"]:
+            urgency_context = f"\n\n🚨 URGENCY: {urgency} - Requiring immediate attention"
+        
+        # Process request with specialist agent
+        full_request = f"PATIENT REQUEST: {patient_request}{patient_context}{urgency_context}"
+        
+        if specialist in self.agents:
+            specialist_response = await self.agents[specialist].get_response(full_request)
+            
+            # Log the consultation in database
+            patient_name = "Unknown Patient"
+            if "my name is" in patient_request.lower():
+                try:
+                    name_part = patient_request.lower().split("my name is")[1].split(".")[0].strip()
+                    patient_name = name_part.title()
+                except (IndexError, AttributeError):
+                    pass
+            
+            diagnosis = f"{specialist.capitalize()} Consultation - {urgency} Priority"
+            self.data_connector.add_patient_visit(patient_name, patient_request, diagnosis)
+            
+            return f"🏥 **{specialist.capitalize()} Care**\n\n{specialist_response.content}"
+        else:
+            return f"❌ Specialist '{specialist}' not available for this request."
+
+    async def handle_patient_request(self, patient_request: str) -> dict:
+        """Complete processing of a patient request"""
         # Step 1: Route the request
         routing_decision = await self.route_patient_request(patient_request)
         
-        print(f"✅ Triage Decision:")
-        print(f"   Specialist: {routing_decision['specialist']}")
-        print(f"   Urgency: {routing_decision['urgency']}")
-        print(f"   Reasoning: {routing_decision['reasoning']}")
-        
         # Step 2: Process with appropriate specialist
-        specialist_key = routing_decision["specialist"]
-        if specialist_key in self.specialists:
-            print(f"🔧 Connecting to {self.specialists[specialist_key].name}...")
-            specialist_result = await self.specialists[specialist_key].process_request(patient_request)
+        if routing_decision["specialist"] in self.agents:
+            specialist_response = await self.process_with_specialist(
+                patient_request, 
+                routing_decision["specialist"],
+                routing_decision["urgency"]
+            )
             
             return {
                 "routing_decision": routing_decision,
-                "specialist_response": specialist_result,
-                "specialist_name": self.specialists[specialist_key].name
+                "specialist_response": specialist_response,
+                "specialist_name": routing_decision["specialist"].capitalize() + " Specialist"
             }
         else:
             return {
                 "routing_decision": routing_decision,
-                "specialist_response": "❌ No suitable specialist found for this case.",
+                "specialist_response": "❌ No suitable specialist found for this medical case.",
                 "specialist_name": "Unknown"
             }
-
-class HospitalTriageSystem:
-    """Main hospital triage system coordinating all agents"""
-    
-    def __init__(self):
-        self.router = TriageRouter()
-    
-    async def handle_patient_requests(self, requests: list):
-        """Process multiple patient requests"""
-        
-        print("🏥 HOSPITAL TRIAGE MULTI-AGENT SYSTEM")
-        print("Intelligent Routing and Medical Triage Demo")
-        print("=" * 60)
-        
-        # Test database connection
-        try:
-            data_connector = PatientDataConnector()
-            print("✅ Azure SQL Database connection successful")
-            
-            # Show sample patient data
-            sample_patient = data_connector.get_patient_info("John Smith")
-            if sample_patient:
-                print(f"📊 Sample patient data: {sample_patient['name']}, {sample_patient['age']} years old")
-                
-        except Exception as e:
-            print(f"❌ Database connection failed: {e}")
-        
-        for i, request in enumerate(requests, 1):
-            print(f"\n{'#' * 60}")
-            print(f"PATIENT REQUEST #{i}")
-            print(f"{'#' * 60}")
-            
-            try:
-                result = await self.router.process_patient_request(request)
-                self.display_result(result)
-                
-                # Small pause between requests
-                await asyncio.sleep(2)
-                
-            except Exception as e:
-                print(f"❌ Error processing request: {e}")
-                continue
 
     def display_result(self, result: dict):
         """Display the processing result"""
         print(f"\n🎯 MEDICAL TRIAGE COMPLETE")
         print(f"Handled by: {result['specialist_name']}")
         print(f"Urgency: {result['routing_decision']['urgency']}")
-        print("\n" + "=" * 50)
+        print("\n" + "=" * 60)
         print(f"{result['specialist_response']}")
-        print("=" * 50)
+        print("=" * 60)
 
 async def main():
-    # Check environment
+    """Main medical triage system demo"""
+    print("🏥 MEDICAL TRIAGE MULTI-AGENT SYSTEM")
+    print("Intelligent Routing and Patient Care with Azure SQL")
+    print("Semantic Kernel 1.37.0 with Modern Agent Framework")
+    print("=" * 70)
+    
+    # Validate environment setup
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME", 
+        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
         "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
         "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY",
         "AZURE_SQL_CONNECTION_STRING"
     ]
-    missing_vars = [var for var in required_vars if not os.environ.get(var)]
+    
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
     
     if missing_vars:
-        print("❌ Missing environment variables. Please check your .env file.")
-        print(f"Missing: {missing_vars}")
+        print(f"❌ Missing environment variables: {missing_vars}")
+        print("Please check your .env file")
         return
     
-    hospital_system = HospitalTriageSystem()
+    manager = MedicalAgentManager()
     
-    # Sample patient requests
+    # Test database connection
+    try:
+        data_connector = PatientDataConnector()
+        print("✅ Azure SQL Database connection successful")
+        
+        # Show sample patient data
+        sample_patient = data_connector.get_patient_info("John Smith")
+        if sample_patient:
+            print(f"📊 Sample patient data: {sample_patient['name']}, {sample_patient['age']} years old")
+            
+    except Exception as e:
+        print(f"❌ Database connection failed: {e}")
+    
+    # Sample patient requests covering different scenarios
     patient_requests = [
         "I have a mild cough and runny nose for 3 days",
         "Severe chest pain and difficulty breathing started 30 minutes ago",
@@ -520,7 +407,23 @@ async def main():
     ]
     
     # Process patient requests
-    await hospital_system.handle_patient_requests(patient_requests)
+    for i, patient_request in enumerate(patient_requests[:6], 1):
+        print(f"\n{'#' * 70}")
+        print(f"PATIENT REQUEST #{i}")
+        print(f"{'#' * 70}")
+        
+        try:
+            result = await manager.handle_patient_request(patient_request)
+            manager.display_result(result)
+            
+            # Brief pause between requests
+            await asyncio.sleep(2)
+            
+        except Exception as e:
+            print(f"❌ Error processing request: {e}")
+            continue
+    
+    print("\n✅ Medical triage system demo completed successfully!")
 
 if __name__ == "__main__":
     asyncio.run(main())
