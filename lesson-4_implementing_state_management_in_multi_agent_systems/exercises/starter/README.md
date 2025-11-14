@@ -1,33 +1,32 @@
-# 🧩 Task Management System — Multi-Agent State Management Exercise
+# 🧩 Project Management System — Multi-Agent State Management Exercise
 
 ## 🎯 Exercise Overview
 
-Transform this starter code into a complete **project management system**!
-You'll implement **state management with Pydantic models** and create **specialized agents** for task management.
+Transform this starter code into a complete **project management system** using **Semantic Kernel 1.37.0**!
+You'll implement **state management with KernelBaseModel** and create **specialized agents** for intelligent project coordination.
 
 ---
-
 
 ## 🏗️ System Architecture
 
 ![Architecture Diagram](architecture.png)
 
-Target architecture showing the project management system you'll build with shared state management across multiple agents.
+Target architecture showing the modern project management system you'll build with shared state management across multiple agents using Semantic Kernel's latest agent framework.
 
 ---
 
 ## 📋 Exercise Tasks
 
-### 🧱 Task 1: Implement Pydantic Models
+### 🧱 Task 1: Implement KernelBaseModel Models
 
-**File:** `task_management_starter.py`
+**File:** `project_management_starter.py`
 
 ---
 
 #### 1.1 Complete the `Task` Model
 
 ```python
-class Task(BaseModel):
+class Task(KernelBaseModel):
     task_id: str
     title: str
     description: str
@@ -36,6 +35,11 @@ class Task(BaseModel):
     assignee: Optional[str]  # member_id
     due_date: datetime
 ```
+
+**Add kernel functions:**
+
+* `check_task_overdue()`: Check if task is overdue
+* `get_task_info()`: Return formatted task information
 
 **Add validators:**
 
@@ -47,7 +51,7 @@ class Task(BaseModel):
 #### 1.2 Complete the `TeamMember` Model
 
 ```python
-class TeamMember(BaseModel):
+class TeamMember(KernelBaseModel):
     member_id: str
     name: str
     role: str
@@ -55,16 +59,18 @@ class TeamMember(BaseModel):
     current_tasks: List[str]  # task_ids
 ```
 
-**Add property:**
+**Add kernel functions:**
 
-* `task_count`: returns the number of current tasks
+* `get_task_count()`: Returns number of assigned tasks
+* `check_member_availability()`: Check if member has capacity
+* `get_member_profile()`: Return formatted member information
 
 ---
 
 #### 1.3 Complete the `Project` Model
 
 ```python
-class Project(BaseModel):
+class Project(KernelBaseModel):
     project_id: str
     name: str
     description: str
@@ -73,17 +79,21 @@ class Project(BaseModel):
     team_members: List[str]  # member_ids
 ```
 
-**Add validators and properties:**
+**Add kernel functions:**
+
+* `calculate_completion_percentage()`: Calculate % of completed tasks
+* `get_overdue_tasks()`: Return list of overdue tasks
+* `get_project_status()`: Return comprehensive project status
+
+**Add validators:**
 
 * `status` must be one of: `planning`, `active`, `on_hold`, `completed`
-* `completion_percentage`: calculates % of completed tasks
-* `overdue_tasks`: returns list of overdue tasks
 
 ---
 
-### 🧩 Task 2: Implement `ProjectState`
+### 🧩 Task 2: Implement `ProjectState` with Kernel Functions
 
-**File:** `task_management_starter.py`
+**File:** `project_management_starter.py`
 
 Complete the `ProjectState` class with:
 
@@ -91,68 +101,65 @@ Complete the `ProjectState` class with:
 
 * `projects`, `team_members`, `tasks` — all `Dict`
 
-**Methods:**
+**Kernel Functions:**
 
-* `add_project(project: Project)`
-* `add_team_member(member: TeamMember)`
-* `add_task(task: Task)`
-* `update_task_status(task_id: str, status: str)`
-* `get_project_status()`: returns summary string
+* `add_project(project: Project) -> str`
+* `add_team_member(member: TeamMember) -> str`
+* `add_task(task: Task) -> str`
+* `update_task_status(task_id: str, status: str) -> str`
+* `get_project_status_summary()`: returns comprehensive dashboard
 
 ---
 
-### 🤖 Task 3: Complete the Agents
+### 🤖 Task 3: Complete the ProjectOperationsPlugin
 
-**File:** `task_management_starter.py`
+**File:** `project_management_starter.py`
 
-#### 3.1 Enhance `TaskAgent`
+#### 3.1 Implement Project Operations Plugin
 
-* Improve the prompt for task management
-* Return actual counts for `pending_tasks` and `overdue_tasks`
+Create kernel functions for:
+* `get_task_metrics()`: Comprehensive task statistics
+* `get_team_capacity()`: Team workload analysis  
+* `get_project_progress()`: Progress analytics
 
-#### 3.2 Enhance `ResourceAgent`
+#### 3.2 Enhance Agent Instructions
 
-* Improve the prompt for resource management
-* Return actual `team_members` count and `available_capacity`
+Update all agents to use the new kernel functions and provide data-driven responses.
 
 #### 3.3 Implement `ProgressAgent`
 
-* Tracks project progress and metrics
-* Provides progress analysis and recommendations
+* Tracks project progress and metrics using kernel functions
+* Provides progress analysis and data-driven recommendations
 
 ---
 
-### 🏗️ Task 4: Complete `ProjectManagementSystem`
+### 🏗️ Task 4: Complete `ProjectAgentManager`
 
-**File:** `task_management_starter.py`
+**File:** `project_management_starter.py`
 
-#### 4.1 Initialize Sample Data
+#### 4.1 Initialize Sample Data with Kernel Functions
 
 In `_initialize_sample_data()`:
 
-* 3 team members with different roles and skills
-* 8–10 tasks with different statuses and priorities
-* 1–2 projects with associated tasks and team members
+* 4 team members with different roles and skills
+* 8-10 tasks with different statuses and priorities
+* 1-2 projects with associated tasks and team members
+* Use `add_team_member`, `add_task`, `add_project` kernel functions
 
-#### 4.2 Add `ProgressAgent`
+#### 4.2 Register ProjectOperationsPlugin
 
-* Register the new agent in the agents dictionary
+* Properly register the plugin with the kernel
+* Ensure all kernel functions are accessible to agents
 
-#### 4.3 Implement State Display
+#### 4.3 Enhance Coordination Logic
 
-`display_project_state()` should show:
+Improve `_parse_coordination_decision()` to properly parse agent routing decisions.
 
-* Number of projects and their statuses
-* Team member count and task distribution
-* Task statistics (total, completed, overdue)
+#### 4.4 Implement Project Operation Simulation
 
-#### 4.4 Implement Task Completion Simulation
-
-`simulate_task_completion()` should:
-
-* Mark a random task as completed
-* Update the project state
-* Show before/after state
+`simulate_project_operation()` should:
+* Use kernel functions to update task status
+* Show before/after metrics using project analytics
 
 ---
 
@@ -161,7 +168,7 @@ In `_initialize_sample_data()`:
 ### 1️⃣ Install Dependencies
 
 ```bash
-pip install semantic-kernel==1.36.2 python-dotenv pydantic
+pip install semantic-kernel==1.37.0 python-dotenv
 ```
 
 ### 2️⃣ Configure Environment
@@ -169,7 +176,7 @@ pip install semantic-kernel==1.36.2 python-dotenv pydantic
 Create a `.env` file with your Azure OpenAI credentials:
 
 ```env
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/completions?api-version=2025-01-01-preview
+AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
 AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
 AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
 ```
@@ -177,22 +184,22 @@ AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
 ### 3️⃣ Run Starter Code
 
 ```bash
-python task_management_starter.py
+python project_management_starter.py
 ```
 
 ---
 
 ## 💡 Implementation Hints
 
-### For Pydantic Models
+### For KernelBaseModel Models
 
 ```python
-@validator('status')
-def validate_status(cls, v):
-    allowed = ['todo', 'in_progress', 'review', 'done']
-    if v not in allowed:
-        raise ValueError(f'Status must be one of {allowed}')
-    return v
+@kernel_function(
+    name="check_task_overdue",
+    description="Check if the task is overdue"
+)
+def is_overdue(self) -> bool:
+    return self.status != 'done' and self.due_date < datetime.now()
 
 @property
 def task_count(self) -> int:
@@ -201,28 +208,41 @@ def task_count(self) -> int:
 
 ---
 
-### For ProjectState
+### For ProjectState with Kernel Functions
 
 ```python
-def add_task(self, task: Task) -> None:
+@kernel_function(
+    name="add_task_to_system",
+    description="Add or update task in the system"
+)
+def add_task(self, task: Task) -> str:
     self.tasks[task.task_id] = task
+    return f"✅ Added task '{task.title}' to system"
+```
 
-def update_task_status(self, task_id: str, status: str) -> bool:
-    if task_id in self.tasks:
-        self.tasks[task_id].status = status
-        return True
-    return False
+---
+
+### For Project Operations Plugin
+
+```python
+@kernel_function(
+    name="get_task_metrics",
+    description="Get comprehensive task metrics and statistics"
+)
+def get_task_metrics(self) -> str:
+    # Implement metrics calculation using project_state
+    return formatted_metrics_string
 ```
 
 ---
 
 ### For Sample Data
 
-Create realistic sample data:
+Create realistic sample data using kernel functions:
 
-* **Team Members:** Project Manager, Developer, Designer
-* **Tasks:** Varying priorities and due dates
-* **Projects:** Different stages of completion
+* **Team Members:** Project Manager, Developer, Designer, DevOps
+* **Tasks:** Varying priorities, statuses, and realistic due dates
+* **Projects:** Active project with comprehensive task list
 
 ---
 
@@ -230,40 +250,47 @@ Create realistic sample data:
 
 After completing all tasks, your system should:
 
-* Display project state with actual data
-* Process all scenarios with detailed agent responses
-* Simulate state changes during task completion
-* Track progress metrics across projects
-* Handle resource allocation recommendations
+* Display comprehensive project dashboard with actual metrics
+* Process scenarios with data-driven agent responses using kernel functions
+* Simulate state changes using proper kernel function calls
+* Track progress metrics across projects using analytics
+* Handle intelligent agent coordination and routing
 
 ---
 
 ## 📊 Expected Output
 
 ```text
-📋 PROJECT MANAGEMENT EXERCISE
-==================================================
+🏢 MODERN PROJECT MANAGEMENT SYSTEM
+Multi-Agent State Management Exercise
+Semantic Kernel 1.37.0 with Advanced Agent Framework
+======================================================================
 
-📊 CURRENT PROJECT STATE:
-Projects: 2 (1 active, 1 planning)
-Team Members: 3
-Total Tasks: 10 (4 completed, 2 overdue)
-Completion Rate: 40%
+📊 INITIAL PROJECT STATE:
+📊 PROJECT MANAGEMENT DASHBOARD:
+• Projects: 1 total (1 active, 0 completed)
+• Tasks: 8 total (1 completed, 1 overdue)
+• Team: 4 members
+• Overall Completion: 12.5%
+• System Status: 🟢 Operational
 
-🎯 SCENARIO 1: We have 3 tasks overdue...
-🤖 Consulting specialists...
+🚀 Starting multi-agent project management exercise...
+Available Agents: Task Manager, Resource Manager, Project Coordinator
+TODO: Implement Progress Tracker agent
 
-TASKS AGENT:
-Analysis: With 3 overdue tasks, I recommend...
-📊 Task Stats: 4 pending, 2 overdue
+🎯 PROJECT REQUEST PROCESSING COMPLETE
+Handled by: Task Manager
+Supporting: None
+Session: 2 messages
 
-RESOURCES AGENT:
-Analysis: Current team capacity is at 70%...
-👥 Team: 3 members, 30% available capacity
+======================================================================
+📋 Task Management Analysis
 
-PROGRESS AGENT:
-Analysis: Project is 60% complete but behind schedule...
-📈 Metrics: 40% completion, 2 weeks behind
+Analysis based on current project metrics:
+• 7 pending tasks with 1 overdue
+• Priority distribution: 2 critical, 2 high, 3 medium, 1 low
+• Recommended actions for overdue task reassignment...
+======================================================================
 ```
 
 ---
@@ -272,12 +299,13 @@ Analysis: Project is 60% complete but behind schedule...
 
 Your solution is complete when:
 
-* [x] All Pydantic models are implemented with validation
-* [x] `ProjectState` manages all entities correctly
-* [x] All three agents provide detailed, context-aware analysis
-* [x] Sample data initializes the system properly
-* [x] State changes are visible during simulations
-* [x] Progress tracking works across all scenarios
+* [x] All KernelBaseModel models are implemented with kernel functions
+* [x] `ProjectState` manages all entities with proper kernel functions
+* [x] ProjectOperationsPlugin provides comprehensive analytics
+* [x] All four agents provide data-driven, context-aware analysis
+* [x] Sample data initializes using kernel functions
+* [x] State changes are visible during simulations using project analytics
+* [x] Progress tracking works across all scenarios with kernel functions
 
 ---
 
@@ -285,11 +313,14 @@ Your solution is complete when:
 
 If you get stuck:
 
-* Review the **Book Store demo** for state management patterns
-* Check **Pydantic documentation** for model validation
-* Start with simple models and gradually add complexity
-* Test each component independently before integrating
+* Review **Semantic Kernel 1.37.0 documentation** for KernelBaseModel and agents
+* Check **kernel function decorators** for proper registration
+* Start with simple models and gradually add kernel functions
+* Test each kernel function independently before agent integration
+* Use the coordination agent to understand request routing
 
 ---
 
 **Good luck! 🚀**
+
+---
