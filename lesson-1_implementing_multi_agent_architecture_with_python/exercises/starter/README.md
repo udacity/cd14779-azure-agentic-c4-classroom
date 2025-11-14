@@ -1,164 +1,171 @@
-# Smart City Monitoring System - Exercise Starter
+# Smart City Multi-Agent System - Starter Code
 
-## 🎯 Learning Objectives
+## 🎯 Learning Exercise Overview
 
-This exercise will help you practice:
+This starter code provides the foundation for building an advanced multi-agent smart city management system using **Semantic Kernel 1.37.0**. Your task is to complete the implementation by:
 
-* Extending multi-agent AI systems
-* Creating structured prompts for LLMs
-* Implementing new specialized workers
-* Adding intelligent coordination logic
-* Working with **Semantic Kernel 1.36.2**
+* **Creating Specialized Agents**: Implement all required AI agents with proper configurations
+* **Adding Environment Manager**: Extend the system with environmental expertise
+* **Implementing Sequential Collaboration**: Build a sophisticated workflow where agents build on each other's analyses
 
 ---
 
-## 🏗️ Target System Architecture
+## 🏗️ System Architecture Framework
 
 ![Architecture Diagram](architecture.png)
 
-The diagram shows the target architecture you'll be building:
-- **User/Main Function** sends monitoring requests to the **City Coordinator**
-- **City Coordinator** analyzes relevance and orchestrates the workflow
-- **Four Worker Agents** (Traffic, Energy, Safety, Environment) process requests
-- Each agent returns analysis to the coordinator, which aggregates results for the user
-
-Your tasks will enhance the existing 3-agent system to match this 4-agent coordinated architecture.
+The starter code provides the basic structure:
+- **SmartCityAgentManager** orchestrates agent interactions
+- **Placeholder Agents** ready for your implementation
+- **Shared Kernel Instance** for optimized resource usage
+- **Dual Processing Framework**: Parallel analysis & sequential collaboration patterns
 
 ---
 
 ## 📋 Exercise Tasks
 
-Complete the following **TODOs** in the starter code:
+### 1. Agent Creation & Configuration
 
-### 1. Enhanced Prompt Engineering
+**TODO: Implement all agents in the `__init__` method:**
 
-**File: `smart_city_starter.py`**
+```python
+self.agents = {
+    "traffic": None,      # Create Traffic Manager agent
+    "energy": None,       # Create Energy Analyst agent  
+    "safety": None,       # Create Safety Officer agent
+    "environment": None,  # Create Environment Manager agent
+    "coordinator": None   # Create City Coordinator agent
+}
+```
 
-Improve the prompts for existing workers to provide more structured and comprehensive analysis:
+**Each agent should include:**
+- **Name**: Follow naming conventions (e.g., "Traffic_Manager")
+- **Description**: Clear domain expertise description
+- **Instructions**: Detailed role-specific guidance
 
-* **TrafficWorker**: Current conditions, root cause analysis, immediate actions, long-term solutions, impact assessment
-* **EnergyWorker**: Current patterns, efficiency opportunities, cost-saving measures, sustainability improvements, implementation timeline
-* **SafetyWorker**: Risk assessment, immediate concerns, preventive measures, emergency response, community recommendations
+### 2. Environment Manager Integration
 
----
+**TODO: Add Environment Manager to parallel analysis:**
 
-### 2. Implement Environment Worker
+```python
+tasks = {
+    "🚦 Traffic": ...,
+    "⚡ Energy": ...,
+    "🚨 Safety": ...,
+    "🌳 Environment": ...  # Add this line
+}
+```
 
-**File: `smart_city_starter.py`**
+### 3. Sequential Collaboration Implementation
 
-Create a new `EnvironmentWorker` class that handles:
+**TODO: Complete the `run_sequential_collaboration` method:**
 
-* Environmental impact assessment
-* Sustainability recommendations
-* Pollution control measures
-* Green infrastructure suggestions
-* Regulatory compliance
-
----
-
-### 3. Add Environment Worker to Coordinator
-
-**File: `smart_city_starter.py`**
-
-Register the new `EnvironmentWorker` in the `CityCoordinator`'s workers dictionary.
-
----
-
-### 4. Implement Smart Coordination
-
-**File: `smart_city_starter.py`**
-
-Add two new methods to `CityCoordinator`:
-
-* `analyze_relevance()`: Use LLM to determine which workers are relevant for a given request
-* `coordinate_smart_monitoring()`: Invoke only the relevant workers based on the analysis
+- **Step 1**: Traffic analysis
+- **Step 2**: Energy analysis (using traffic context)
+- **Step 3**: Safety analysis (using traffic + energy context)  
+- **Step 4**: Environmental analysis (using all previous context)
+- **Step 5**: Integrated summary generation
 
 ---
 
-### 5. Add Environmental Scenario
+## 🔧 Technical Framework
 
-**File: `smart_city_starter.py`**
+### Semantic Kernel 1.37.0 Features
 
-Add an environmental scenario to the demo scenarios list.
+* **Modern Agent Framework**: Uses `ChatCompletionAgent` class
+* **Azure OpenAI Foundry**: All agents use enterprise AI services
+* **InProcessRuntime**: Proper runtime management for agent execution
+* **Async/Await Patterns**: Efficient concurrent processing
 
----
+### Error Handling Structure
 
-## 🛠️ Setup Instructions
+* Pre-implemented exception handling in `_get_agent_response`
+* Graceful degradation when individual agents fail
+* Comprehensive error reporting
 
-1. **Environment Setup**
+### Performance Optimizations
 
-   ```bash
-   pip install semantic-kernel==1.36.2 python-dotenv
-   ```
-
-2. **Azure OpenAI Configuration**
-   Create a `.env` file with your credentials:
-
-   ```bash
-   AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
-   AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-   AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
-   ```
-
-3. **Run the Starter Code**
-
-   ```bash
-   python smart_city_starter.py
-   ```
+* **Shared Kernel**: Single instance for all agents
+* **Parallel Processing**: `asyncio.gather()` for concurrent analysis
+* **Resource Management**: Proper runtime lifecycle
 
 ---
 
-## 💡 Implementation Hints
+## 🚀 Getting Started
 
-**For Enhanced Prompts**
+### 1. Environment Setup
 
-* Use clear section headers (e.g., 🚦, 🔍, 🚨)
-* Ask for specific types of information in each section
-* Include practical, actionable recommendations
-* Consider both short-term and long-term solutions
+```bash
+pip install semantic-kernel==1.37.0 python-dotenv
+```
 
-**For Environment Worker**
+### 2. Azure OpenAI Configuration
 
-* Model it after the existing workers
-* Focus on environmental sustainability metrics
-* Include both monitoring and improvement recommendations
+Create `.env` file:
 
-**For Smart Coordination**
+```env
+AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-foundry-deployment
+AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+```
 
-* Create a prompt that analyzes request content
-* Define clear criteria for relevance scoring
-* Consider threshold-based worker selection
+### 3. Run the Starter Code
 
----
-
-## 🧪 Testing Your Solution
-
-After completing all tasks, your enhanced system should:
-
-* Provide more detailed, structured analysis from each worker
-* Include environmental analysis for relevant scenarios
-* Show relevance analysis before processing requests
-* Handle all demo scenarios without errors
+```bash
+python smart_city_starter.py
+```
 
 ---
 
-## 📚 Learning Resources
+## 🎯 Expected Learning Outcomes
 
-* [Semantic Kernel Documentation](https://learn.microsoft.com/semantic-kernel)
-* [Azure OpenAI Documentation](https://learn.microsoft.com/azure/ai-services/openai/)
-* [Prompt Engineering Guide](https://learn.microsoft.com/azure/ai-services/openai/concepts/prompt-engineering)
+After completing this exercise, you will understand:
+
+* **Modern Agent Patterns**: Creating and configuring `ChatCompletionAgent` instances
+* **Multi-Agent Orchestration**: Coordinating multiple specialized AI agents
+* **Context-Aware Processing**: Building sequential workflows with shared context
+* **Production Best Practices**: Error handling, resource management, and performance optimization
+* **System Extensibility**: Adding new domain experts to existing architecture
 
 ---
 
-## 🆘 Need Help?
+## 🔍 Exercise Instructions
+
+1. **Review the TODOs**: Each TODO comment indicates a required implementation
+2. **Start with Agent Creation**: Complete the agent initialization in `__init__`
+3. **Test Parallel Analysis**: Verify all agents work in parallel mode
+4. **Implement Sequential Flow**: Build the step-by-step collaboration
+5. **Validate with Scenarios**: Use the provided test scenarios to verify functionality
+
+---
+
+## 📚 Learning Progression
+
+This exercise builds progressively:
+
+1. **Basic Agent Setup** → Understanding Semantic Kernel agent framework
+2. **System Extension** → Adding new capabilities to existing architecture  
+3. **Advanced Orchestration** → Implementing complex multi-agent workflows
+4. **Production Patterns** → Error handling and performance optimization
+
+---
+
+## 🆘 Getting Help
 
 If you get stuck:
-
-* Check the solution code for reference
-* Review the **Semantic Kernel 1.36.2 API** documentation
-* Look at the existing worker implementations as examples
-* Test your prompts directly in **Azure OpenAI Studio** first
+1. Review the Semantic Kernel 1.37.0 documentation for `ChatCompletionAgent`
+2. Check the error messages carefully - they often indicate the specific issue
+3. Ensure your Azure OpenAI credentials are correctly configured
+4. Verify all agents have proper names, descriptions, and instructions
 
 ---
 
-✨ Good luck! 🚀
+## ✅ Success Criteria
+
+Your implementation is complete when:
+- All five agents are properly configured and functional
+- Environment Manager participates in parallel analysis
+- Sequential collaboration works end-to-end with all agents
+- No TODO comments remain in the code
+- All test scenarios execute successfully
+---

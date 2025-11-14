@@ -1,181 +1,175 @@
 import asyncio
 import os
 from semantic_kernel import Kernel
+from semantic_kernel.agents import ChatCompletionAgent
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
-from semantic_kernel.functions.kernel_function_from_prompt import KernelFunctionFromPrompt
+from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
-load_dotenv("../../../.env")
 
-class Cityworker:
-    def __init__(self, name: str, expertise: str):
-        self.name = name
-        self.expertise = expertise
+load_dotenv("../../.env")
+
+class SmartCityAgentManager:
+    def __init__(self):
+        # Single shared kernel instance for all agents
         self.kernel = Kernel()
         
+        # Add Azure service to kernel once
         self.kernel.add_service(
             AzureChatCompletion(
-                service_id="chat_completion",
+                service_id="azure_chat_completion",
                 deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
                 endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
                 api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
             )
         )
-    
-    async def process_request(self, request: str) -> str:
-        raise NotImplementedError("Subclasses must implement this method")
-
-class Trafficworker(Cityworker):
-    def __init__(self):
-        super().__init__("Traffic Manager", "Urban traffic flow and congestion management")
-    
-    async def process_request(self, request: str) -> str:
-        # TODO: Create a more detailed prompt for traffic analysis
-        # The prompt should ask for:
-        # - Current traffic conditions
-        # - Root cause analysis
-        # - Immediate actions
-        # - Long-term solutions
-        # - Impact assessment
-        prompt = "You are a traffic expert. Analyze this traffic situation: {{$request}}"
         
-        function = KernelFunctionFromPrompt(
-            function_name="traffic_analysis",
-            plugin_name="traffic",
-            prompt=prompt
-        )
-        
-        result = await self.kernel.invoke(function, request=request)
-        return f"🚦 Traffic Analysis by {self.name}:\n{result}"
-
-class Energyworker(Cityworker):
-    def __init__(self):
-        super().__init__("Energy Analyst", "City energy consumption and distribution")
-    
-    async def process_request(self, request: str) -> str:
-        # TODO: Create a more detailed prompt for energy analysis
-        # The prompt should ask for:
-        # - Current energy usage patterns
-        # - Efficiency opportunities
-        # - Cost-saving measures
-        # - Sustainability improvements
-        # - Implementation timeline
-        prompt = "You are an energy expert. Analyze this energy situation: {{$request}}"
-        
-        function = KernelFunctionFromPrompt(
-            function_name="energy_analysis",
-            plugin_name="energy",
-            prompt=prompt
-        )
-        
-        result = await self.kernel.invoke(function, request=request)
-        return f"⚡ Energy Analysis by {self.name}:\n{result}"
-
-class Safetyworker(Cityworker):
-    def __init__(self):
-        super().__init__("Safety Officer", "Public safety and emergency response")
-    
-    async def process_request(self, request: str) -> str:
-        # TODO: Create a more detailed prompt for safety analysis
-        # The prompt should ask for:
-        # - Risk assessment
-        # - Immediate safety concerns
-        # - Preventive measures
-        # - Emergency response plans
-        # - Community safety recommendations
-        prompt = "You are a safety expert. Analyze this safety situation: {{$request}}"
-        
-        function = KernelFunctionFromPrompt(
-            function_name="safety_analysis",
-            plugin_name="safety",
-            prompt=prompt
-        )
-        
-        result = await self.kernel.invoke(function, request=request)
-        return f"🚨 Safety Analysis by {self.name}:\n{result}"
-
-# TODO: Implement the EnvironmentWorker class
-# This worker should handle environmental and sustainability issues
-# class EnvironmentWorker(Cityworker):
-#     def __init__(self):
-#         super().__init__("Environment Specialist", "Environmental monitoring and sustainability")
-    
-#     async def process_request(self, request: str) -> str:
-#         # TODO: Create a detailed prompt for environmental analysis
-#         # The prompt should ask for:
-#         # - Environmental impact assessment
-#         # - Sustainability recommendations
-#         # - Pollution control measures
-#         # - Green infrastructure suggestions
-#         # - Compliance with environmental regulations
-#         pass
-
-class CityCoordinator:
-    def __init__(self):
-        self.workers = {
-            "traffic": Trafficworker(),
-            "energy": Energyworker(),
-            "safety": Safetyworker()
-            # TODO: Add EnvironmentWorker to the workers dictionary
+        # TODO: Initialize specialized agents with proper descriptions
+        # Create Traffic Manager agent
+        self.agents = {
+            "traffic": None,  # TODO: Create Traffic Manager agent
+            
+            # TODO: Create Energy Analyst agent
+            "energy": None,
+            
+            # TODO: Create Safety Officer agent  
+            "safety": None,
+            
+            # TODO: Create Environment Manager agent
+            "environment": None,
+            
+            # TODO: Create City Coordinator agent
+            "coordinator": None
         }
-    
-    async def coordinate_monitoring(self, monitoring_request: str) -> dict:
-        """Coordinate monitoring across all workers"""
-        results = {}
+
+    async def run_parallel_analysis(self, scenario: str):
+        """Run all agent analyses in parallel with proper error handling"""
+        print(f"🔍 Analyzing: {scenario}")
+        print("-" * 50)
         
-        tasks = [worker.process_request(monitoring_request) for worker in self.workers.values()]
-        worker_results = await asyncio.gather(*tasks, return_exceptions=True)
+        # TODO: Create tasks for all agents including the new environment agent
+        tasks = {
+            "🚦 Traffic": self._get_agent_response(self.agents["traffic"], scenario),
+            "⚡ Energy": self._get_agent_response(self.agents["energy"], scenario),
+            "🚨 Safety": self._get_agent_response(self.agents["safety"], scenario),
+            # TODO: Add Environment agent to parallel analysis
+            # "🌳 Environment": self._get_agent_response(self.agents["environment"], scenario)
+        }
         
-        for (worker_name, worker), result in zip(self.workers.items(), worker_results):
+        # Execute all analyses in parallel
+        results = await asyncio.gather(*tasks.values(), return_exceptions=True)
+        
+        # Display results
+        for (role, _), result in zip(tasks.items(), results):
             if isinstance(result, Exception):
-                results[worker_name] = f"❌ Error: {result}"
+                print(f"{role}: Error - {result}")
             else:
-                results[worker_name] = result
+                print(f"{role}:\n{result}\n")
+
+    async def run_sequential_collaboration(self, complex_scenario: str):
+        """Run sequential collaboration between all agents"""
+        print(f"🤖 Starting Sequential Collaboration")
+        print(f"Topic: {complex_scenario}")
+        print("=" * 60)
         
-        return results
-    
-    # TODO: Implement this method to analyze which workers are relevant for a request
-    # async def analyze_relevance(self, request: str) -> dict:
-    #     """Use LLM to determine which workers are most relevant for the request"""
-    #     # This should return a dictionary with relevance scores for each worker
-    #     pass
-    
-    # TODO: Implement this method to only use relevant workers
-    # async def coordinate_smart_monitoring(self, monitoring_request: str) -> dict:
-    #     """Only use relevant workers based on request analysis"""
-    #     # Steps:
-    #     # 1. Analyze which workers are relevant
-    #     # 2. Only invoke relevant workers
-    #     # 3. Return results from relevant workers only
-    #     pass
+        runtime = InProcessRuntime()
+        runtime.start()
+        
+        try:
+            # Step 1: Traffic analysis
+            print("1. 🚦 Traffic Analysis Starting...")
+            # TODO: Get traffic analysis
+            
+            # Step 2: Energy analysis (with traffic context)
+            print("2. ⚡ Energy Analysis Starting...")
+            # TODO: Get energy analysis using traffic context
+            
+            # Step 3: Safety analysis (with traffic and energy context)
+            print("3. 🚨 Safety Analysis Starting...")
+            # TODO: Get safety analysis using traffic and energy context
+            
+            # Step 4: Environmental analysis (with all previous context)
+            print("4. 🌳 Environmental Analysis Starting...")
+            # TODO: Get environmental analysis using all previous context
+            
+            # Step 5: Generate integrated summary
+            print("5. 📋 Generating Integrated Summary...")
+            # TODO: Generate comprehensive summary using coordinator
+            
+            print("🎯 Sequential Collaboration Completed!")
+            print("=" * 60)
+            
+        except Exception as e:
+            print(f"❌ Collaboration error: {e}")
+            import traceback
+            traceback.print_exc()
+        finally:
+            await runtime.stop_when_idle()
+
+    async def _get_agent_response(self, agent: ChatCompletionAgent, scenario: str) -> str:
+        """Get response from individual agent with optimized error handling"""
+        try:
+            response = await agent.get_response(scenario)
+            return str(response.content)
+        except Exception as e:
+            return f"Error processing request: {str(e)}"
 
 async def main():
-    print("Smart City Monitoring System - Starter Code")
-    print("=" * 50)
-    print("This is the basic version. Complete the TODOs to enhance the system!")
-    print()
+    """Main demo function"""
+    print("🏙️ Smart City Multi-Agent System - Student Exercise")
+    print("Complete the TODOs to build your multi-agent system!")
+    print("=" * 60)
     
-    coordinator = CityCoordinator()
+    manager = SmartCityAgentManager()
     
+    # Individual analysis scenarios (parallel processing)
     scenarios = [
-        "Heavy traffic congestion on Main Street during rush hour with average speeds below 10 mph",
-        "Energy consumption peaks in downtown offices between 2-5 PM, 40% above normal levels",
-        "Safety concerns in Central Park after dark due to poor lighting and limited security patrols",
-        # TODO: Add an environmental scenario
-        # "High air pollution levels reported in industrial district exceeding safety standards"
+        "Heavy traffic congestion on Main Street during rush hour with increased energy demands from idling vehicles",
+        "New residential development project requiring coordinated traffic, energy, and safety planning",
+        "High air pollution levels reported in industrial district exceeding safety standards"
     ]
     
-    for i, scenario in enumerate(scenarios, 1):
-        print(f"Scenario {i}: {scenario}")
-        print("-" * 60)
-        
-        results = await coordinator.coordinate_monitoring(scenario)
-        
-        for worker_type, analysis in results.items():
-            print(f"\n{analysis}")
-            print("-" * 40)
-        
-        print("\n" + "=" * 60)
-        print()
+    # TODO: Uncomment when agents are implemented
+    # for i, scenario in enumerate(scenarios, 1):
+    #     print(f"\n📋 Scenario {i}: Parallel Agent Analysis")
+    #     await manager.run_parallel_analysis(scenario)
+    
+    # Complex collaborative scenario (sequential processing)
+    complex_scenario = """MAJOR CITY INFRASTRUCTURE PROJECT:
+
+The city is planning a new subway line construction that will:
+1. Require 2 years of phased construction
+2. Affect major traffic arteries during construction  
+3. Increase energy demands for construction equipment
+4. Require safety planning for construction zones and public access
+5. Need long-term urban planning integration
+6. Has long-term environmental impact considerations
+
+All departments must collaborate on a comprehensive plan."""
+    
+    print("\n" + "=" * 60)
+    print("🚀 Sequential Collaboration (Complete TODOs to enable)")
+    print("=" * 60)
+    # TODO: Uncomment when sequential collaboration is implemented
+    # await manager.run_sequential_collaboration(complex_scenario)
+    
+    print("\n🎓 Exercise Instructions:")
+    print("1. Create all agents in the __init__ method")
+    print("2. Add Environment Manager agent to parallel analysis") 
+    print("3. Implement sequential collaboration with all agents")
+    print("4. Test with the provided scenarios")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Validate environment variables
+    required_vars = [
+        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
+        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
+        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+    ]
+    
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
+    if missing_vars:
+        print(f"❌ Missing environment variables: {missing_vars}")
+        print("Please check your .env file")
+    else:
+        asyncio.run(main())

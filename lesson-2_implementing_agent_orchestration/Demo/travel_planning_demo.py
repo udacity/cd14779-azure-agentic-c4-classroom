@@ -4,6 +4,7 @@ from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.functions.kernel_function_from_prompt import KernelFunctionFromPrompt
 from dotenv import load_dotenv
+from semantic_kernel.agents.runtime import InProcessRuntime
 
 load_dotenv("../../.env")
 
