@@ -1,210 +1,201 @@
-# 🍽️ Restaurant Recommendation System - Exercise
+# 🍽️ Restaurant Recommendation System - Starter Code
 
-## 🎯 Exercise Overview
+## 🎯 Learning Exercise Overview
 
-Transform this starter code into a complete **multi-agent restaurant recommendation system**!
-You'll implement missing agents and orchestration patterns to create a smart dining advisor.
+This starter code provides the foundation for building an advanced multi-agent restaurant recommendation system using **Semantic Kernel 1.37.0**. Your task is to complete the implementation by:
 
-## System Architecture
+* **Creating Specialized Agents**: Implement all required restaurant agents with modern configurations
+* **Implementing Orchestration Patterns**: Build three different coordination strategies
+* **Adding Coordinator Agent**: Create integrated restaurant recommendations
+* **Modern Architecture**: Use shared kernel and proper runtime management
+
+---
+
+## 🏗️ System Architecture Framework
 
 ![Architecture Diagram](architecture.png)
 
-This diagram depicts the target restaurant recommendation system with three specialized agents coordinated through sequential, parallel, and conditional orchestration patterns for intelligent dining recommendations.
+The starter code provides the basic structure:
+- **RestaurantAgentManager** orchestrates agent interactions
+- **Four Placeholder Agents** ready for your implementation
+- **Shared Kernel Instance** with Azure OpenAI Foundry
+- **Three Orchestration Patterns**: Sequential, Parallel, Conditional frameworks
 
 ---
 
 ## 📋 Exercise Tasks
 
-### Task 1: Improve Existing Agents
+### 1. **Agent Creation & Configuration**
 
-**File: `restaurant_starter.py`**
-
-#### 1.1 Enhance `CuisineAgent` Prompt
-
-Include:
-
-* 2–3 recommended cuisine types
-* Why each cuisine fits the request
-* Popular dishes to try
-* Dietary considerations
-
-#### 1.2 Enhance `LocationAgent` Prompt
-
-Include:
-
-* Recommended neighborhoods/areas
-* Atmosphere descriptions
-* Transportation/parking tips
-* Best times to visit
-
----
-
-### Task 2: Implement `PriceRangeAgent`
-
-**File: `restaurant_starter.py`**
-
-Create a new class that handles:
-
-* Price range estimates ($, $$, $$$)
-* Value-for-money suggestions
-* Cost-saving tips
-* Typical meal prices
-
----
-
-### Task 3: Complete `RestaurantOrchestrator`
-
-**File: `restaurant_starter.py`**
-
-#### 3.1 Add `PriceRangeAgent` to Orchestrator
-
-Register the new agent in the `agents` dictionary.
-
-#### 3.2 Complete Sequential Orchestration
-
-Add `PriceRangeAgent` as **step 3** in the sequential workflow.
-
-#### 3.3 Implement Parallel Orchestration
-
-Run all agents simultaneously using `asyncio.gather`.
-
-#### 3.4 Implement Conditional Orchestration
-
-Select agents dynamically based on request content.
-
----
-
-### Task 4: Test All Patterns
-
-**File: `restaurant_starter.py`**
-
-* Uncomment and test the **parallel** and **conditional** patterns in the main function.
-
----
-
-## 🛠️ Setup Instructions
-
-1. **Install Dependencies**
-
-   ```bash
-   pip install semantic-kernel==1.36.2 python-dotenv
-   ```
-
-2. **Configure Environment**
-   Create a `.env` file with your Azure OpenAI credentials:
-
-   ```env
-   AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
-   AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-   AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
-   ```
-
-3. **Run Starter Code**
-
-   ```bash
-   python restaurant_starter.py
-   ```
-
----
-
-## 💡 Implementation Hints
-
-**For Better Prompts:**
-
-* Use clear, specific instructions
-* Ask for structured information
-* Include practical, actionable advice
-* Consider different dining scenarios
-
-**For `PriceRangeAgent`:**
-
-* Model it after existing agents
-* Focus on budget-friendly advice
-* Include price ranges and typical costs
-
-**For Parallel Orchestration:**
+**TODO: Implement all agents in the `__init__` method:**
 
 ```python
-tasks = [
-    self.agents["cuisine"].process_request(request),
-    self.agents["location"].process_request(request),
-    self.agents["price"].process_request(request)
-]
-results = await asyncio.gather(*tasks)
+self.agents = {
+    "cuisine": None,      # Create Cuisine Expert agent
+    "location": None,     # Create Location Expert agent  
+    "price": None,        # Create Price Range Expert agent
+    "coordinator": None   # Create Restaurant Coordinator agent
+}
 ```
 
-**For Conditional Orchestration:**
+**Each agent should include:**
+- **Name**: Follow naming conventions (e.g., "Cuisine_Expert")
+- **Description**: Clear domain expertise description
+- **Instructions**: Detailed role-specific guidance and response structure
 
-* Analyze keywords in the request
-* Use simple if–else logic
-* Map keywords to relevant agents
+### 2. **Sequential Orchestration Implementation**
+
+**TODO: Complete the `sequential_orchestration` method:**
+
+- **Step 1**: Cuisine analysis (foundation)
+- **Step 2**: Location analysis (using cuisine context)
+- **Step 3**: Price analysis (using cuisine + location context)
+- **Step 4**: Integrated coordination and final recommendations
+
+### 3. **Parallel Orchestration Completion**
+
+**TODO: Implement the `parallel_orchestration` method:**
+
+- Use `asyncio.gather()` for concurrent agent execution
+- Handle exceptions gracefully for each agent
+- Format results consistently with emoji indicators
+
+### 4. **Conditional Orchestration Building**
+
+**TODO: Create the `conditional_orchestration` method:**
+
+- Analyze request content to determine needed agents
+- Implement smart routing logic based on keywords
+- Execute only relevant agents for efficiency
 
 ---
 
-## 🧪 Testing Your Solution
+## 🔧 Technical Framework
 
-After completing all tasks, your system should:
+### Modern Semantic Kernel 1.37.0 Features
 
-* Provide **detailed recommendations** from all three agents
-* Support all orchestration patterns:
+* **ChatCompletionAgent**: Modern agent class with descriptions and instructions
+* **Shared Kernel Instance**: Single Azure OpenAI Foundry service for all agents
+* **InProcessRuntime**: Proper runtime lifecycle management
+* **Async/Await Patterns**: Efficient concurrent processing
 
-  * **Sequential**: Cuisine → Location → Price
-  * **Parallel**: All agents simultaneously
-  * **Conditional**: Smart agent selection
-* Handle multiple restaurant scenarios without errors
+### Pre-Implemented Structure
+
+* **Error Handling**: Basic exception handling in helper methods
+* **Result Display**: Clean formatting system for outputs
+* **Environment Validation**: Azure credential checking
+* **Scenario Testing**: Multiple restaurant use cases provided
+
+### Performance Foundation
+
+* **Shared Resources**: Single kernel instance optimization
+* **Concurrent Processing**: Framework for parallel execution
+* **Context Management**: Structure for sequential context sharing
 
 ---
 
-## 📚 Expected Output
+## 🚀 Getting Started
 
-```text
-🎉 SEQUENTIAL ORCHESTRATION RESULTS
-============================================================
+### 1. Environment Setup
 
-🍽️ Cuisine Recommendations
-1. Authentic Italian — Perfect for romantic occasions  
-   - Must-try: Osso Buco, Tiramisu  
-   - Great for special celebrations  
+```bash
+pip install semantic-kernel==1.37.0 python-dotenv
+```
 
-2. Modern Italian Fusion — Creative dishes in upscale setting  
-   - Must-try: Truffle Pasta, Burrata  
-   - Romantic ambiance with contemporary twist  
+### 2. Azure OpenAI Configuration
 
-📍 Location Recommendations
-• Downtown Fine Dining District  
-  - Atmosphere: Intimate, candlelit  
-  - Parking: Valet available  
-  - Best time: 7–8 PM  
+Create `.env` file with Foundry credentials:
 
-• Riverside Restaurants  
-  - Atmosphere: Scenic, peaceful  
-  - Best for special occasions  
+```env
+AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-foundry-deployment
+AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+```
 
-💰 Price Range Recommendations
-• Price Range: $$$ (Fine Dining)  
-• Average Cost: $80–120 per person  
-• Value Tips: Look for prix fixe menus, book early for specials  
-• Typical Prices: Appetizers $15–20, Mains $30–45, Desserts $12–18  
+### 3. Run the Starter Code
+
+```bash
+python restaurant_starter.py
 ```
 
 ---
 
-## 🆘 Need Help?
+## 🎯 Expected Learning Outcomes
 
-* Review the **travel planning demo** for orchestration patterns
-* Check the solution code for reference
-* Test one agent at a time
-* Start with simple prompts, then enhance
+After completing this exercise, you will understand:
 
----
-
-## 🎯 Success Criteria
-
-✅ All three agents provide structured recommendations
-✅ All orchestration patterns work correctly
-✅ The system handles different restaurant scenarios
-✅ Output is clear, detailed, and well-formatted
+* **Modern Agent Patterns**: Creating and configuring `ChatCompletionAgent` instances
+* **Multi-Agent Orchestration**: Three distinct coordination strategies
+* **Context-Aware Processing**: Building sequential workflows with shared context
+* **Intelligent Routing**: Conditional execution based on request analysis
+* **Production Best Practices**: Error handling, resource management, and performance
 
 ---
 
-🚀 Good luck building your restaurant advisor!
+## 🔍 Exercise Instructions
+
+### Phase 1: Agent Foundation
+1. **Review the TODOs**: Each TODO comment indicates required implementation
+2. **Create Agent Classes**: Build CuisineAgent, LocationAgent, PriceAgent, CoordinatorAgent
+3. **Configure Agents**: Set proper names, descriptions, and instructions
+4. **Test Basic Setup**: Verify environment and agent initialization
+
+### Phase 2: Orchestration Implementation  
+5. **Complete Sequential Pattern**: Build context-aware processing chain
+6. **Implement Parallel Pattern**: Use `asyncio.gather()` for concurrency
+7. **Build Conditional Pattern**: Create intelligent agent selection
+8. **Test Each Pattern**: Use provided restaurant scenarios
+
+### Phase 3: Integration & Refinement
+9. **Verify All Patterns**: Ensure all three orchestration methods work
+10. **Test Edge Cases**: Handle errors and unusual requests gracefully
+11. **Optimize Performance**: Ensure efficient resource usage
+12. **Document Learnings**: Understand trade-offs between patterns
+
+---
+
+## 📚 Learning Progression
+
+This exercise builds progressively:
+
+1. **Basic Agent Setup** → Understanding Semantic Kernel agent framework
+2. **Pattern Implementation** → Three distinct orchestration strategies  
+3. **Context Management** → Sequential workflows with shared analysis
+4. **Intelligent Systems** → Conditional execution and smart routing
+5. **Production Readiness** → Error handling and performance optimization
+
+---
+
+## 🍴 Restaurant Scenarios Provided
+
+The starter includes diverse test cases:
+- **Romantic Anniversary**: Italian food, medium budget
+- **Family Dining**: Kid-friendly, casual atmosphere  
+- **Business Lunch**: Quiet, professional, budget-conscious
+- **Authentic Cuisine**: Specific food type, flexible budget
+
+---
+
+## 🆘 Getting Help
+
+If you get stuck:
+1. Review Semantic Kernel 1.37.0 documentation for `ChatCompletionAgent`
+2. Check error messages carefully - they often indicate specific issues
+3. Ensure Azure OpenAI credentials are correctly configured
+4. Verify all agents have proper names, descriptions, and instructions
+5. Use the provided helper methods for consistent formatting
+
+---
+
+## ✅ Success Criteria
+
+Your implementation is complete when:
+- All four agents are properly configured and functional
+- Sequential orchestration works with context sharing
+- Parallel orchestration executes all agents simultaneously  
+- Conditional orchestration intelligently selects relevant agents
+- No TODO comments remain in the code
+- All test scenarios execute successfully
+- Error handling works gracefully for all patterns
+
+---
