@@ -6,7 +6,8 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
 
-load_dotenv("../../.env")
+# load_dotenv("../../.env")
+load_dotenv()
 
 class SmartCityAgentManager:
     def __init__(self):
@@ -103,10 +104,10 @@ class SmartCityAgentManager:
             print("2. ⚡ Energy Analysis Starting...")
             energy_prompt = f"""Scenario: {complex_scenario}
 
-Previous Analysis from Traffic Department:
-{traffic_content}
+            Previous Analysis from Traffic Department:
+            {traffic_content}
 
-Provide energy consumption and distribution analysis considering the traffic implications."""
+            Provide energy consumption and distribution analysis considering the traffic implications."""
             
             energy_response = await self.agents["energy"].get_response(energy_prompt)
             energy_content = str(energy_response.content)  # Convert to string
@@ -116,13 +117,13 @@ Provide energy consumption and distribution analysis considering the traffic imp
             print("3. 🚨 Safety Analysis Starting...")
             safety_prompt = f"""Scenario: {complex_scenario}
 
-Previous Analysis from Traffic Department Analysis:
-{traffic_content}
+            Previous Analysis from Traffic Department Analysis:
+            {traffic_content}
 
-Previous Analysis from Energy Department Analysis:
-{energy_content}
+            Previous Analysis from Energy Department Analysis:
+            {energy_content}
 
-Provide comprehensive safety analysis integrating all previous assessments."""
+            Provide comprehensive safety analysis integrating all previous assessments."""
             
             safety_response = await self.agents["safety"].get_response(safety_prompt)
             safety_content = str(safety_response.content)  # Convert to string
