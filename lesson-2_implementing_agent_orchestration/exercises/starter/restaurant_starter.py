@@ -199,28 +199,6 @@ class RestaurantAgentManager:
             print(f"\n{result}")
             print("─" * 50)
 
-# TODO: Create the CuisineAgent class
-# class CuisineAgent:
-#     def __init__(self, kernel):
-#         self.agent = ChatCompletionAgent(
-#             kernel=kernel,
-#             name="Cuisine_Expert",
-#             description="Specialist in cuisine recommendations and food types",
-#             instructions="""You are an expert in cuisine and food types..."""
-#         )
-
-# TODO: Create the LocationAgent class  
-# class LocationAgent:
-#     ...
-
-# TODO: Create the PriceAgent class
-# class PriceAgent:
-#     ...
-
-# TODO: Create the CoordinatorAgent class
-# class CoordinatorAgent:
-#     ...
-
 async def main():
     """Main exercise function"""
     print("🍴 RESTAURANT RECOMMENDATION SYSTEM - STUDENT EXERCISE")

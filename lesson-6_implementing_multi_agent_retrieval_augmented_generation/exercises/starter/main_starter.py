@@ -1,3 +1,15 @@
+"""
+Udacity AI Programming Course - Multi-Agent RAG System Exercise
+Exercise: Build a Sequential Orchestration RAG System with Semantic Kernel
+
+Learning Objectives:
+1. Understand multi-agent systems and sequential orchestration
+2. Implement document retrieval and chunking with ChromaDB
+3. Create specialized AI agents for different analysis tasks
+4. Build a comprehensive research report generation system
+5. Handle errors and edge cases in agent workflows
+"""
+
 import asyncio
 import os
 import uuid
@@ -26,7 +38,6 @@ logging.getLogger("semantic_kernel").setLevel(logging.WARNING)
 logging.getLogger("in_process_runtime").setLevel(logging.WARNING)
 logging.getLogger("in_process_runtime.events").setLevel(logging.WARNING)
 
-# Modern KernelBaseModel for Research Report
 class ResearchReport(KernelBaseModel):
     """Model representing a final research report using KernelBaseModel"""
     report_id: str
@@ -50,7 +61,7 @@ class SequentialRAGOrchestration:
         self.kernel = Kernel()
         
         # Azure OpenAI service configuration
-        deployment_name = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_NAME", "gpt-35-turbo")
+        deployment_name = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_NAME", "gpt-4o-mini")
         endpoint = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", "https://mock-openai.azure.com/")
         api_key = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_KEY", "mock-key")
         
@@ -76,7 +87,7 @@ class SequentialRAGOrchestration:
             3. Ensure documents are properly categorized
             4. Provide a document overview to the next agent
             
-            Focus on identifying key documents from financial, technical, and market collections.
+            Focus on identifying key documents from financial, technical, market, and risk collections.
             Provide a brief summary of available documents and their relevance.
             Keep your response focused and under 200 words.
             """,
@@ -139,8 +150,22 @@ class SequentialRAGOrchestration:
             """,
             service=self.kernel.get_service("azure_rag_chat")
         )
+
+        # TODO 1: Create Risk Assessment Agent
+        # INSTRUCTIONS:
+        # Create a new ChatCompletionAgent for risk assessment with the following requirements:
+        # - Name: "Risk_Assessment_Analyst"
+        # - Instructions should focus on:
+        #   * Operational risks and compliance requirements
+        #   * Market risks and external threats  
+        #   * Technical risks and security vulnerabilities
+        #   * Financial risks and mitigation strategies
+        # - Keep response under 200 words
+        # - Build upon previous financial, technical, and market analysis
+        # - Use the same service as other agents: self.kernel.get_service("azure_rag_chat")
+        risk_agent = None  # STUDENT: Replace None with your ChatCompletionAgent implementation
         
-        # Synthesis Coordinator Agent
+        # Synthesis Coordinator Agent (updated to include risk assessment)
         synthesis_agent = ChatCompletionAgent(
             name="Synthesis_Coordinator",
             instructions="""
@@ -149,10 +174,10 @@ class SequentialRAGOrchestration:
             
             Create a comprehensive research report with:
             1. Executive Summary
-            2. Integrated Analysis (combining financial, technical, market insights)
+            2. Integrated Analysis (combining financial, technical, market, and risk insights)
             3. Key Findings
             4. Strategic Recommendations
-            5. Risk Assessment
+            5. Risk Assessment with mitigation strategies
             
             Provide a holistic view that business leaders can use for decision-making.
             Use all previous analyses as context for your synthesis.
@@ -160,7 +185,12 @@ class SequentialRAGOrchestration:
             service=self.kernel.get_service("azure_rag_chat")
         )
         
-        return [document_agent, financial_agent, technical_agent, market_agent, synthesis_agent]
+        # TODO 2: Return all agents including the new risk agent
+        # INSTRUCTIONS:
+        # Update the return statement to include the new risk_agent in the correct sequence
+        # The sequence should be: document_agent, financial_agent, technical_agent, market_agent, risk_agent, synthesis_agent
+        # HINT: Make sure risk_agent comes after market_agent and before synthesis_agent
+        return [document_agent, financial_agent, technical_agent, market_agent, synthesis_agent]  # STUDENT: Update this list
 
     async def load_documents(self):
         """Load documents to ChromaDB if not already loaded in the database"""
@@ -203,7 +233,7 @@ class SequentialRAGOrchestration:
         """Search for relevant documents across all collections"""
         return await self.chroma_store.semantic_search(
             query=research_topic,
-            collection_names=["financial", "technical", "market"],
+            collection_names=["financial", "technical", "market", "risk"],
             top_k=2
         )
 
@@ -213,18 +243,18 @@ class SequentialRAGOrchestration:
         print(f"{message.content}\n")
 
     async def run_sequential_analysis(self, research_topic: str) -> ResearchReport:
-        """Run research analysis using SequentialOrchestration - EXACT Microsoft pattern"""
+        """Run research analysis using SequentialOrchestration"""
         print(f"\n🔍 RESEARCH TOPIC: {research_topic}")
         print("=" * 60)
         
-        # Always ensure documents are available (they'll only load once due to ChromaDB persistence)
+        # Ensure documents are available
         await self.load_documents()
         
         # Search for relevant documents for THIS specific topic
         search_results = await self.search_relevant_documents(research_topic)
         document_context = self._prepare_document_context(search_results)
         
-        # Create FRESH sequential agents for each query
+        # Create sequential agents
         agents = self.create_sequential_agents()
         
         print(f"🤖 Created {len(agents)} specialized agents for this analysis")
@@ -235,15 +265,19 @@ class SequentialRAGOrchestration:
             agent_response_callback=self.agent_response_callback,
         )
         
-        # Set up runtime EXACTLY as per Microsoft documentation
+        # Set up runtime
         runtime = InProcessRuntime()
         
         try:
-            # Start runtime (NOT awaited - exactly as in Microsoft example)
+            # Start runtime
             runtime.start()
             print("✅ Runtime started successfully")
             
-            # Prepare the orchestration task
+            # TODO 3: Update the orchestration task to include the new risk agent
+            # INSTRUCTIONS:
+            # Update the orchestration_task string to include the risk assessment step
+            # Add step 5 for Risk Assessment Analyst between market analyst and synthesis coordinator
+            # Make sure the task description clearly explains the sequential workflow
             orchestration_task = f"""
             RESEARCH TOPIC: {research_topic}
             
@@ -258,7 +292,7 @@ class SequentialRAGOrchestration:
             5. Synthesis Coordinator: Create comprehensive final report
             
             Each agent builds upon the previous analysis.
-            """
+            """  # STUDENT: Update this task to include risk assessment step
             
             print("🚀 Invoking SequentialOrchestration...")
             
@@ -287,13 +321,15 @@ class SequentialRAGOrchestration:
                     f"Sequential analysis completed by {len(agents)} specialized agents",
                     f"Analyzed {len(sources)} source documents",
                     "Used Semantic Kernel SequentialOrchestration",
-                    f"Found documents in collections: {', '.join(set(r['collection'] for r in search_results))}"
+                    f"Found documents in collections: {', '.join(set(r['collection'] for r in search_results))}",
+                    "Includes comprehensive risk assessment"
                 ],
                 recommendations=[
                     "Implement cross-functional initiatives based on integrated findings",
                     "Establish ongoing monitoring of identified opportunities",
                     "Continue multi-agent analysis for strategic decisions",
-                    "Validate findings with additional market research"
+                    "Validate findings with additional market research",
+                    "Implement risk mitigation strategies identified"
                 ],
                 sources=sources,
                 generated_by="SequentialOrchestration"
@@ -310,7 +346,7 @@ class SequentialRAGOrchestration:
             traceback.print_exc()
             return await self._create_fallback_report(research_topic, search_results)
         finally:
-            # Stop runtime EXACTLY as per Microsoft documentation
+            # Stop runtime
             try:
                 await runtime.stop_when_idle()
                 print("✅ Runtime stopped successfully")
@@ -403,7 +439,7 @@ class SequentialRAGOrchestration:
         EXECUTIVE SUMMARY:
         This analysis examines {research_topic} based on {len(sources)} relevant documents 
         from {len(collections)} specialized collections. The documents provide insights into 
-        financial performance, technical capabilities, and market positioning.
+        financial performance, technical capabilities, market positioning, and risk factors.
         
         KEY INSIGHTS:
         • Multiple document sources available for comprehensive analysis
@@ -414,6 +450,7 @@ class SequentialRAGOrchestration:
         1. Review the specific document contents for detailed insights
         2. Consider expanding analysis with additional data sources
         3. Validate findings through targeted market research
+        4. Conduct dedicated risk assessment based on available documents
         
         NOTE: This report was generated using fallback analysis methods.
         """
@@ -426,7 +463,7 @@ class SequentialRAGOrchestration:
                 f"Analyzed {len(sources)} source documents across {len(collections)} domains",
                 f"Document collections: {', '.join(collections)}",
                 "Fallback analysis method used",
-                "Documents contain relevant financial, technical, and market insights"
+                "Documents contain relevant financial, technical, market, and risk insights"
             ],
             recommendations=[
                 "Review system configuration for agent orchestration",
@@ -437,6 +474,60 @@ class SequentialRAGOrchestration:
             sources=sources,
             generated_by="FallbackAnalyzer"
         )
+
+    # TODO 4: Add method to validate agent responses
+    # INSTRUCTIONS:
+    # Create a method called validate_agent_responses that:
+    # 1. Takes research_topic (str) and agents (List[ChatCompletionAgent]) as parameters
+    # 2. Returns bool indicating if all agents are properly configured
+    # 3. Checks that all required agents are present (Document_Loader, Financial_Analyst, Technical_Analyst, Market_Analyst, Risk_Assessment_Analyst, Synthesis_Coordinator)
+    # 4. Verifies each agent has proper service configuration
+    # 5. Prints validation results and returns True if valid, False otherwise
+    def validate_agent_responses(self, research_topic: str, agents: List[ChatCompletionAgent]) -> bool:
+        """Validate that all agents are properly configured for the research topic"""
+        # STUDENT: Implement this method
+        pass
+
+    # TODO 5: Add method to handle partial failures
+    # INSTRUCTIONS:
+    # Create a method called handle_partial_failure that:
+    # 1. Takes research_topic (str), successful_agents (List[str]), failed_agent (str), error_message (str) as parameters
+    # 2. Returns a ResearchReport object
+    # 3. Creates a partial report that acknowledges which agents succeeded and which failed
+    # 4. Includes recommendations for addressing the failure
+    # 5. Uses document search to include available sources
+    async def handle_partial_failure(self, research_topic: str, successful_agents: List[str], 
+                                   failed_agent: str, error_message: str) -> ResearchReport:
+        """Create a report when some agents succeed but others fail"""
+        # STUDENT: Implement this method
+        pass
+
+    # TODO 6: Add method to save and load report results
+    # INSTRUCTIONS:
+    # Create two methods:
+    # 1. save_report_to_file: Saves ResearchReport to JSON file
+    # 2. load_report_from_file: Loads ResearchReport from JSON file
+    # 
+    # save_report_to_file should:
+    # - Take report (ResearchReport) and optional filename (str)
+    # - Generate filename with timestamp if not provided
+    # - Convert ResearchReport to dictionary and save as JSON
+    # - Return the filename used
+    #
+    # load_report_from_file should:
+    # - Take filename (str) 
+    # - Load JSON and convert back to ResearchReport
+    # - Handle datetime conversion from ISO format string
+    # - Return ResearchReport object
+    def save_report_to_file(self, report: ResearchReport, filename: str = None) -> str:
+        """Save research report to a JSON file"""
+        # STUDENT: Implement this method
+        pass
+
+    def load_report_from_file(self, filename: str) -> ResearchReport:
+        """Load research report from a JSON file"""
+        # STUDENT: Implement this method
+        pass
 
     def display_report(self, report: ResearchReport):
         """Display the research report without truncation"""
@@ -468,7 +559,7 @@ class SequentialRAGOrchestration:
 async def main():
     """Main demo execution"""
     print("🚀 MULTI-AGENT RAG SYSTEM WITH SEQUENTIAL ORCHESTRATION")
-    print("Semantic Kernel 1.37.0 - Microsoft Documentation Pattern")
+    print("Udacity AI Programming Course - Enhanced with Risk Analysis")
     print("=" * 70)
     
     # Check environment variables
@@ -485,13 +576,6 @@ async def main():
             print(f"   - {var}")
         print("\nTo use real Azure OpenAI, please set these environment variables.")
     
-    # Research topics
-    research_topics = [
-        "Company growth strategy and financial performance",
-        "Technical architecture and AI platform development",
-        "Market competition and customer analysis"
-    ]
-    
     # Initialize the system
     rag_system = SequentialRAGOrchestration()
     
@@ -499,6 +583,14 @@ async def main():
     print("📚 Pre-loading documents...")
     await rag_system.load_documents()
     print("✅ Documents ready for analysis\n")
+    
+    # Research topics - now including risk-focused topics
+    research_topics = [
+        "Company growth strategy and financial performance",
+        "Technical architecture and AI platform development", 
+        "Market competition and customer analysis",
+        "Risk assessment and mitigation strategies"  # NEW: Risk-focused topic
+    ]
     
     # Run analysis for each topic
     all_reports = []
@@ -509,16 +601,27 @@ async def main():
         print(f"{'='*70}")
         
         try:
-            # Create a FRESH analysis for each topic
+            # TODO: Add agent validation call here after implementing TODO 4
+            # Validate agents before running analysis
+            # agents = rag_system.create_sequential_agents()
+            # if not rag_system.validate_agent_responses(topic, agents):
+            #     print("❌ Agent validation failed, skipping this analysis")
+            #     continue
+            
+            # Run sequential analysis for this topic
             report = await rag_system.run_sequential_analysis(topic)
             all_reports.append(report)
             
             # Display this report immediately
             rag_system.display_report(report)
             
+            # TODO: Add report saving call here after implementing TODO 6
+            # Save report to file
+            # rag_system.save_report_to_file(report)
+            
             if i < len(research_topics):
                 print(f"\n⏳ Preparing next analysis...")
-                await asyncio.sleep(2)  # Small delay between analyses
+                await asyncio.sleep(2)
                 
         except Exception as e:
             print(f"❌ Error in analysis {i}: {e}")
