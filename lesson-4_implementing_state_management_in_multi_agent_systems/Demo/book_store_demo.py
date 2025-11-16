@@ -1,6 +1,6 @@
 import asyncio
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 from datetime import datetime
 from semantic_kernel import Kernel
 from semantic_kernel.agents import ChatCompletionAgent

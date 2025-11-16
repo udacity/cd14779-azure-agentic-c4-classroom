@@ -1,8 +1,9 @@
 import chromadb
 from chromadb.config import Settings
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import uuid
 import logging
+import asyncio
 from pydantic import BaseModel, Field
 import hashlib
 
@@ -156,12 +157,20 @@ class ChromaDBManager:
         best_collection = max(collection_scores, key=collection_scores.get)
         return best_collection if collection_scores[best_collection] > 5 else "general"
 
-    def add_document(self, filename: str, content: str, metadata: Dict = None) -> int:
+    async def chunk_and_store_document(self, filename: str, content: str, collection_type: str) -> int:
+        """Async wrapper for adding document to ChromaDB"""
+        return await asyncio.get_event_loop().run_in_executor(
+            None, self.add_document, filename, content, collection_type
+        )
+
+    def add_document(self, filename: str, content: str, collection_type: str = None) -> int:
         """Add document to ChromaDB with automatic chunking and collection assignment"""
         try:
-            # Determine the right collection
-            collection_name = self.determine_collection(filename, content)
-            collection = self.collections[collection_name]
+            # Determine the right collection if not provided
+            if collection_type is None:
+                collection_type = self.determine_collection(filename, content)
+            
+            collection = self.collections[collection_type]
             
             # Chunk the document
             chunks = self.chunk_document(content)
@@ -179,13 +188,10 @@ class ChromaDBManager:
                 chunk_metadata = {
                     "filename": filename,
                     "chunk_id": chunk.chunk_id,
-                    "collection": collection_name,
+                    "collection": collection_type,
                     "document_type": self._extract_document_type(filename),
                     **chunk.metadata
                 }
-                
-                if metadata:
-                    chunk_metadata.update(metadata)
                 
                 metadatas.append(chunk_metadata)
             
@@ -196,7 +202,7 @@ class ChromaDBManager:
                 metadatas=metadatas
             )
             
-            logger.info(f"Added {len(chunks)} chunks from {filename} to {collection_name} collection")
+            logger.info(f"Added {len(chunks)} chunks from {filename} to {collection_type} collection")
             return len(chunks)
             
         except Exception as e:
@@ -216,7 +222,7 @@ class ChromaDBManager:
         else:
             return 'unknown'
     
-    def semantic_search(self, query: str, collection_names: List[str] = None, n_results: int = 5) -> List[Dict]:
+    async def semantic_search(self, query: str, collection_names: List[str] = None, top_k: int = 5) -> List[Dict]:
         """Perform semantic search across specified collections"""
         try:
             if not collection_names:
@@ -230,22 +236,23 @@ class ChromaDBManager:
                     
                     results = collection.query(
                         query_texts=[query],
-                        n_results=n_results
+                        n_results=top_k
                     )
                     
                     # Process results
                     for i in range(len(results['ids'][0])):
                         result = {
-                            "chunk_id": results['ids'][0][i],
+                            "filename": results['metadatas'][0][i]["filename"],
                             "content": results['documents'][0][i],
                             "metadata": results['metadatas'][0][i],
-                            "distance": results['distances'][0][i],
+                            "distance": results['distances'][0][i] if results['distances'] else 0.0,
                             "collection": collection_name
                         }
                         all_results.append(result)
             
             # Sort by distance (lower is better)
-            all_results.sort(key=lambda x: x["distance"])
+            if all_results and 'distance' in all_results[0]:
+                all_results.sort(key=lambda x: x["distance"])
             
             # Group by document and get best chunks
             unique_docs = self._group_by_document(all_results)
@@ -262,27 +269,27 @@ class ChromaDBManager:
         document_groups = {}
         
         for result in results:
-            filename = result["metadata"]["filename"]
+            filename = result["filename"]
             
             if filename not in document_groups:
                 document_groups[filename] = {
                     "filename": filename,
                     "best_chunks": [],
-                    "min_distance": result["distance"],
+                    "min_distance": result.get("distance", 0.0),
                     "collection": result["collection"],
-                    "document_type": result["metadata"]["document_type"]
+                    "document_type": result["metadata"].get("document_type", "unknown")
                 }
             
             # Keep top 2 chunks per document
             if len(document_groups[filename]["best_chunks"]) < 2:
                 document_groups[filename]["best_chunks"].append({
                     "content": result["content"],
-                    "distance": result["distance"]
+                    "distance": result.get("distance", 0.0)
                 })
             
             # Update minimum distance
-            if result["distance"] < document_groups[filename]["min_distance"]:
-                document_groups[filename]["min_distance"] = result["distance"]
+            if result.get("distance", 0.0) < document_groups[filename]["min_distance"]:
+                document_groups[filename]["min_distance"] = result.get("distance", 0.0)
         
         # Convert to list and sort by best match
         unique_docs = list(document_groups.values())
@@ -293,7 +300,7 @@ class ChromaDBManager:
     def hybrid_search(self, query: str, keywords: List[str], collection_names: List[str] = None) -> List[Dict]:
         """Combine semantic search with keyword matching"""
         # Get semantic results
-        semantic_results = self.semantic_search(query, collection_names, n_results=10)
+        semantic_results = self.semantic_search(query, collection_names, top_k=10)
         
         # Boost scores for keyword matches
         for result in semantic_results:
@@ -312,7 +319,7 @@ class ChromaDBManager:
         
         return semantic_results[:5]  # Return top 5
     
-    def get_collection_stats(self) -> Dict:
+    async def get_collection_stats(self) -> Dict:
         """Get statistics for all collections"""
         stats = {}
         

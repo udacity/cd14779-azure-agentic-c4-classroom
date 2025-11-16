@@ -1,53 +1,61 @@
 import asyncio
 import os
 import logging
+from semantic_kernel.agents.runtime import InProcessRuntime
+from semantic_kernel.contents import ChatMessageContent
+
 from blob_connector import BlobStorageConnector
 from chroma_manager import ChromaDBManager
 from rag_agents import (
     RAGSystemState, FinancialRetrievalAgent, TechnicalRetrievalAgent, 
-    MarketRetrievalAgent, SynthesisAgent
+    MarketRetrievalAgent, SynthesisAgent, ResearchReport
 )
-from dotenv import load_dotenv
-load_dotenv("../../.env")
+
 # Setup logging
-logging.getLogger('semantic_kernel').setLevel(logging.WARNING)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Reduce verbosity of some loggers
 logging.getLogger('azure').setLevel(logging.WARNING)
 logging.getLogger('chromadb').setLevel(logging.WARNING)
-
+logging.getLogger('semantic_kernel').setLevel(logging.WARNING)
 
 class MultiAgentRAGSystem:
-    """Main multi-agent RAG system with ChromaDB and Azure Blob Storage"""
+    """Main multi-agent RAG system using Semantic Kernel's Chroma store and Agent Framework"""
     
     def __init__(self):
         # Initialize Azure Blob Storage connector
         self.blob_connector = BlobStorageConnector()
         
-        # Initialize ChromaDB vector store
-        self.chroma_manager = ChromaDBManager()
+        # Initialize Chroma vector store using Semantic Kernel's ChromaStore
+        self.chroma_store = ChromaDBManager()
         
         # Initialize system state
         self.system_state = RAGSystemState()
         
         # Initialize specialized agents
         self.retrieval_agents = {
-            "financial": FinancialRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
-            "technical": TechnicalRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
-            "market": MarketRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager)
+            "financial": FinancialRetrievalAgent(self.system_state, self.blob_connector, self.chroma_store),
+            "technical": TechnicalRetrievalAgent(self.system_state, self.blob_connector, self.chroma_store),
+            "market": MarketRetrievalAgent(self.system_state, self.blob_connector, self.chroma_store)
         }
         
         # Initialize synthesis agent
-        self.synthesis_agent = SynthesisAgent(self.system_state, self.blob_connector, self.chroma_manager)
+        self.synthesis_agent = SynthesisAgent(self.system_state, self.blob_connector, self.chroma_store)
+        
+        # Initialize Semantic Kernel runtime
+        self.runtime = InProcessRuntime()
         
         # Track if documents are loaded
         self.documents_loaded = False
     
-    def load_documents_to_chromadb(self):
-        """Load documents from Azure Blob Storage to ChromaDB"""
+    async def load_documents_to_chromadb(self):
+        """Load documents from Azure Blob Storage to ChromaDB using Semantic Kernel's ChromaStore"""
         if self.documents_loaded:
             print("📚 Documents already loaded to ChromaDB")
             return
         
-        print("🔄 Loading documents to ChromaDB vector store...")
+        print("🔄 Loading documents to Chroma vector store...")
         
         # Upload sample documents to Azure Blob Storage if needed
         documents = self.blob_connector.list_documents()
@@ -56,20 +64,26 @@ class MultiAgentRAGSystem:
             self.blob_connector.upload_sample_documents()
             documents = self.blob_connector.list_documents()
         
-        # Load documents into ChromaDB
+        # Load documents into ChromaDB using the new vector store
         total_chunks = 0
         for doc_name in documents:
             content = self.blob_connector.get_document_content(doc_name)
             if content:
-                chunks_added = self.chroma_manager.add_document(doc_name, content)
+                # Determine the appropriate collection
+                collection_type = self.chroma_store.determine_collection(doc_name, content)
+                
+                # Store document in Chroma
+                chunks_added = await self.chroma_store.chunk_and_store_document(
+                    doc_name, content, collection_type
+                )
                 total_chunks += chunks_added
-                print(f"  ✅ Loaded {doc_name} ({chunks_added} chunks)")
+                print(f"  ✅ Loaded {doc_name} to {collection_type} collection ({chunks_added} chunks)")
         
         self.documents_loaded = True
         print(f"🎉 Successfully loaded {len(documents)} documents with {total_chunks} chunks to ChromaDB")
         
         # Show ChromaDB statistics
-        stats = self.chroma_manager.get_collection_stats()
+        stats = await self.chroma_store.get_collection_stats()
         print(f"\n📊 ChromaDB Collection Stats:")
         for collection, info in stats.items():
             print(f"  {collection}: {info.get('document_count', 0)} documents")
@@ -80,15 +94,15 @@ class MultiAgentRAGSystem:
         
         # Reinitialize all agents with the new system state
         self.retrieval_agents = {
-            "financial": FinancialRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
-            "technical": TechnicalRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager),
-            "market": MarketRetrievalAgent(self.system_state, self.blob_connector, self.chroma_manager)
+            "financial": FinancialRetrievalAgent(self.system_state, self.blob_connector, self.chroma_store),
+            "technical": TechnicalRetrievalAgent(self.system_state, self.blob_connector, self.chroma_store),
+            "market": MarketRetrievalAgent(self.system_state, self.blob_connector, self.chroma_store)
         }
         
-        self.synthesis_agent = SynthesisAgent(self.system_state, self.blob_connector, self.chroma_manager)
+        self.synthesis_agent = SynthesisAgent(self.system_state, self.blob_connector, self.chroma_store)
 
     async def run_research_analysis(self, research_topic: str):
-        """Run complete multi-agent research analysis with semantic search"""
+        """Run complete multi-agent research analysis using Semantic Kernel Agent Framework"""
         # Reset state for new research topic
         self.reset_system_state()
         
@@ -97,9 +111,9 @@ class MultiAgentRAGSystem:
         
         # Ensure documents are loaded
         if not self.documents_loaded:
-            self.load_documents_to_chromadb()
+            await self.load_documents_to_chromadb()
             
-        # Step 1: Parallel retrieval by all specialized agents using ChromaDB
+        # Step 1: Parallel retrieval by all specialized agents using Chroma semantic search
         print(f"\n🤖 Deploying {len(self.retrieval_agents)} specialized agents with semantic search...")
         
         agent_tasks = []
@@ -118,19 +132,15 @@ class MultiAgentRAGSystem:
             print(f"\n{result['agent']}:")
             print(f"  📄 Documents Found: {result['documents_found']}")
             print(f"  🔍 Retrieval Method: {result.get('retrieval_method', 'N/A')}")
-            print(f"  🔗 Sources: {', '.join(result['sources'][:2])}")
-            if result['documents_found'] > 2:
-                print(f"    ... and {result['documents_found'] - 2} more")
-            
-            # Show relevance scores
-            if result.get('relevance_scores'):
-                avg_relevance = sum(result['relevance_scores']) / len(result['relevance_scores'])
-                print(f"  📈 Average Relevance: {avg_relevance:.2f}")
+            if result['sources']:
+                print(f"  🔗 Sources: {', '.join(result['sources'][:2])}")
+                if result['documents_found'] > 2:
+                    print(f"    ... and {result['documents_found'] - 2} more")
             
             total_documents_found += result['documents_found']
         
         # Step 2: Synthesis by coordination agent
-        print(f"\n🧠 SYNTHESIZING FINDINGS FROM SEMANTIC SEARCH...")
+        print(f"\n🧠 SYNTHESIZING FINDINGS FROM {len(agent_results)} SPECIALIZED AGENTS...")
         print("-" * 50)
         
         final_report = await self.synthesis_agent.generate_comprehensive_report(
@@ -145,7 +155,7 @@ class MultiAgentRAGSystem:
         
         return final_report
     
-    def _display_report(self, report):
+    def _display_report(self, report: ResearchReport):
         """Display the final research report"""
         print(f"\n🎯 COMPREHENSIVE RESEARCH REPORT")
         print("=" * 50)
@@ -166,13 +176,10 @@ class MultiAgentRAGSystem:
             print(f"  {i}. {recommendation}")
         
         print(f"\n📚 SOURCES USED ({len(report.sources)} documents):")
-        for source in report.sources:
-            # Find relevance score for this source
-            relevance = next(
-                (doc.relevance_score for doc in self.system_state.retrieved_documents.values() 
-                 if doc.source == source), 0.0
-            )
-            print(f"  - {source} (Relevance: {relevance:.2f})")
+        for source in report.sources[:5]:  # Show first 5 sources
+            print(f"  - {source}")
+        if len(report.sources) > 5:
+            print(f"    ... and {len(report.sources) - 5} more")
     
     def _display_system_metrics(self):
         """Display system performance metrics"""
@@ -189,21 +196,14 @@ class MultiAgentRAGSystem:
         print(f"\nAgent Retrieval Performance:")
         for agent_name, count in self.system_state.retrieval_metrics.items():
             print(f"  {agent_name}: {count} documents")
-        
-        # Show ChromaDB stats
-        stats = self.chroma_manager.get_collection_stats()
-        print(f"\n🗃️ CHROMADB STATISTICS:")
-        for collection, info in stats.items():
-            print(f"  {collection}: {info.get('document_count', 0)} documents")
 
 async def main():
-    """Main demo execution"""
-    print("🚀 MULTI-AGENT RAG SYSTEM WITH CHROMADB & AZURE BLOB STORAGE")
+    """Main demo execution using Semantic Kernel Agent Framework"""
+    print("🚀 MULTI-AGENT RAG SYSTEM WITH SEMANTIC KERNEL AGENT FRAMEWORK")
     print("=" * 70)
     
-    # Check environment variables
+    # Check environment variables with fallbacks for demo
     required_vars = [
-        "BLOB_CONNECTION_STRING",
         "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME", 
         "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT",
         "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
@@ -211,11 +211,10 @@ async def main():
     
     missing_vars = [var for var in required_vars if not os.environ.get(var)]
     if missing_vars:
-        print("❌ Missing environment variables:")
+        print("⚠️  Missing environment variables. Using mock values for demo.")
         for var in missing_vars:
             print(f"   - {var}")
-        print("\nPlease check your .env file")
-        return
+        print("\nTo use real Azure OpenAI, please set these environment variables.")
     
     # Initialize the multi-agent RAG system
     rag_system = MultiAgentRAGSystem()
@@ -223,9 +222,8 @@ async def main():
     # Demo research topics
     research_topics = [
         "Company growth strategy and financial performance",
-        "Technical architecture and AI platform development", 
-        "Market competition and customer analysis",
-        "Product roadmap and future initiatives"
+        "Technical architecture and AI platform development",
+        "Market competition and customer analysis"
     ]
     
     # Run analysis for each topic
@@ -240,10 +238,12 @@ async def main():
             # Small delay between analyses
             if i < len(research_topics):
                 print(f"\n⏳ Preparing next analysis...")
-                await asyncio.sleep(2)
+                await asyncio.sleep(1)
                 
         except Exception as e:
             print(f"❌ Error in analysis {i}: {e}")
+            import traceback
+            traceback.print_exc()
             continue
     
     print(f"\n🎉 DEMO COMPLETED!")
