@@ -6,8 +6,7 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
 
-# load_dotenv("../../.env")
-load_dotenv()
+load_dotenv("../../.env")
 
 class SmartCityAgentManager:
     def __init__(self):
@@ -133,18 +132,18 @@ class SmartCityAgentManager:
             print("4. 📋 Generating Integrated Summary...")
             summary_prompt = f"""Based on all departmental analyses, create a comprehensive summary:
 
-ORIGINAL SCENARIO: {complex_scenario}
+            ORIGINAL SCENARIO: {complex_scenario}
 
-TRAFFIC ANALYSIS:
-{traffic_content}
+            TRAFFIC ANALYSIS:
+            {traffic_content}
 
-ENERGY ANALYSIS:
-{energy_content}
+            ENERGY ANALYSIS:
+            {energy_content}
 
-SAFETY ANALYSIS:
-{safety_content}
+            SAFETY ANALYSIS:
+            {safety_content}
 
-Provide a concise integrated summary with key recommendations and priorities."""
+            Provide a concise integrated summary with key recommendations and priorities."""
             
             summary_response = await self.agents["coordinator"].get_response(summary_prompt)
             summary_content = str(summary_response.content)  # Convert to string
@@ -189,14 +188,14 @@ async def main():
     # Complex collaborative scenario (sequential processing)
     complex_scenario = """MAJOR CITY INFRASTRUCTURE PROJECT:
 
-The city is planning a new subway line construction that will:
-1. Require 2 years of phased construction
-2. Affect major traffic arteries during construction  
-3. Increase energy demands for construction equipment
-4. Require safety planning for construction zones and public access
-5. Need long-term urban planning integration
+    The city is planning a new subway line construction that will:
+    1. Require 2 years of phased construction
+    2. Affect major traffic arteries during construction  
+    3. Increase energy demands for construction equipment
+    4. Require safety planning for construction zones and public access
+    5. Need long-term urban planning integration
 
-All departments must collaborate on a comprehensive plan."""
+    All departments must collaborate on a comprehensive plan."""
     
     print("\n" + "=" * 60)
     print("🚀 Starting Optimized Multi-Agent Collaboration")
