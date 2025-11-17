@@ -6,7 +6,7 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
 
-load_dotenv("../../.env")
+load_dotenv("../.env")
 
 class SmartCityAgentManager:
     def __init__(self):
@@ -17,9 +17,9 @@ class SmartCityAgentManager:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="azure_chat_completion",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+                deployment_name=os.environ["AZURE_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_DEPLOYMENT_KEY"]
             )
         )
         
@@ -103,10 +103,10 @@ class SmartCityAgentManager:
             print("2. ⚡ Energy Analysis Starting...")
             energy_prompt = f"""Scenario: {complex_scenario}
 
-Previous Analysis from Traffic Department:
-{traffic_content}
+            Previous Analysis from Traffic Department:
+            {traffic_content}
 
-Provide energy consumption and distribution analysis considering the traffic implications."""
+            Provide energy consumption and distribution analysis considering the traffic implications."""
             
             energy_response = await self.agents["energy"].get_response(energy_prompt)
             energy_content = str(energy_response.content)  # Convert to string
@@ -116,13 +116,13 @@ Provide energy consumption and distribution analysis considering the traffic imp
             print("3. 🚨 Safety Analysis Starting...")
             safety_prompt = f"""Scenario: {complex_scenario}
 
-Previous Analysis from Traffic Department Analysis:
-{traffic_content}
+            Previous Analysis from Traffic Department Analysis:
+            {traffic_content}
 
-Previous Analysis from Energy Department Analysis:
-{energy_content}
+            Previous Analysis from Energy Department Analysis:
+            {energy_content}
 
-Provide comprehensive safety analysis integrating all previous assessments."""
+            Provide comprehensive safety analysis integrating all previous assessments."""
             
             safety_response = await self.agents["safety"].get_response(safety_prompt)
             safety_content = str(safety_response.content)  # Convert to string
@@ -132,18 +132,18 @@ Provide comprehensive safety analysis integrating all previous assessments."""
             print("4. 📋 Generating Integrated Summary...")
             summary_prompt = f"""Based on all departmental analyses, create a comprehensive summary:
 
-ORIGINAL SCENARIO: {complex_scenario}
+            ORIGINAL SCENARIO: {complex_scenario}
 
-TRAFFIC ANALYSIS:
-{traffic_content}
+            TRAFFIC ANALYSIS:
+            {traffic_content}
 
-ENERGY ANALYSIS:
-{energy_content}
+            ENERGY ANALYSIS:
+            {energy_content}
 
-SAFETY ANALYSIS:
-{safety_content}
+            SAFETY ANALYSIS:
+            {safety_content}
 
-Provide a concise integrated summary with key recommendations and priorities."""
+            Provide a concise integrated summary with key recommendations and priorities."""
             
             summary_response = await self.agents["coordinator"].get_response(summary_prompt)
             summary_content = str(summary_response.content)  # Convert to string
@@ -188,14 +188,14 @@ async def main():
     # Complex collaborative scenario (sequential processing)
     complex_scenario = """MAJOR CITY INFRASTRUCTURE PROJECT:
 
-The city is planning a new subway line construction that will:
-1. Require 2 years of phased construction
-2. Affect major traffic arteries during construction  
-3. Increase energy demands for construction equipment
-4. Require safety planning for construction zones and public access
-5. Need long-term urban planning integration
+    The city is planning a new subway line construction that will:
+    1. Require 2 years of phased construction
+    2. Affect major traffic arteries during construction  
+    3. Increase energy demands for construction equipment
+    4. Require safety planning for construction zones and public access
+    5. Need long-term urban planning integration
 
-All departments must collaborate on a comprehensive plan."""
+    All departments must collaborate on a comprehensive plan."""
     
     print("\n" + "=" * 60)
     print("🚀 Starting Optimized Multi-Agent Collaboration")
@@ -206,9 +206,9 @@ All departments must collaborate on a comprehensive plan."""
 if __name__ == "__main__":
     # Validate environment variables
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+        "AZURE_DEPLOYMENT_NAME",
+        "AZURE_DEPLOYMENT_ENDPOINT", 
+        "AZURE_DEPLOYMENT_KEY"
     ]
     
     missing_vars = [var for var in required_vars if not os.getenv(var)]
