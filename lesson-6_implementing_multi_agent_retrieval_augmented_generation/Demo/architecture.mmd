@@ -1,57 +1,52 @@
 graph TB
     User[User/Multi-Agent RAG System]
 
-    System[Multi-Agent RAG System<br/>Coordinates retrieval &<br/>synthesis workflow]
-
-    State[Shared RAG State<br/>Pydantic Model:<br/>Research Context<br/>Retrieved Documents]
+    System[Multi-Agent RAG System<br/>Sequential Orchestration<br/>Semantic Kernel 1.37]
 
     subgraph "Data Sources"
         Blob[Blob Storage Connector<br/>Azure Blob Storage]
-        Chroma[ChromaDB Manager<br/>Vector Store]
+        Chroma[ChromaDB Manager<br/>Vector Store<br/>Collections: financial, technical, market, general]
     end
 
-    subgraph "Retrieval Agents"
-        Financial[Financial Retrieval Agent<br/>💰 Financial Analyst<br/>Semantic Kernel Instance]
-        Technical[Technical Retrieval Agent<br/>🔧 Technical Analyst<br/>Semantic Kernel Instance]
-        Market[Market Retrieval Agent<br/>📈 Market Analyst<br/>Semantic Kernel Instance]
+    subgraph "Sequential Agent Pipeline"
+        DocLoader[Document Loader Agent<br/>📄 Document Specialist<br/>Prepares & Categorizes Docs]
+        Financial[Financial Analyst Agent<br/>💰 Financial Expert<br/>Revenue, Metrics, Growth]
+        Technical[Technical Analyst Agent<br/>🔧 Tech Specialist<br/>Architecture, Stack, Performance]
+        Market[Market Analyst Agent<br/>📈 Market Researcher<br/>Trends, Competition, Customers]
+        Synthesis[Synthesis Coordinator Agent<br/>📝 Report Generator<br/>Integrates All Findings]
     end
-
-    Synthesis[Synthesis Agent<br/>📝 Synthesizer<br/>Semantic Kernel Instance]
 
     User -->|Research Topic| System
+    System -->|Initialize| Blob
+    System -->|Initialize| Chroma
 
-    System -->|Retrieve relevant docs| Financial
-    System -->|Retrieve relevant docs| Technical
-    System -->|Retrieve relevant docs| Market
+    Blob -.->|Sample Documents| Chroma
 
-    Financial -.->|Query vectors| Chroma
-    Technical -.->|Query vectors| Chroma
-    Market -.->|Query vectors| Chroma
+    System -->|1. Start Pipeline| DocLoader
+    DocLoader -.->|Query ChromaDB| Chroma
+    Chroma -.->|Document Overview| DocLoader
 
-    Chroma -.->|Fetch content| Blob
-    Blob -.->|Document content| Chroma
+    DocLoader -->|2. Sequential Flow| Financial
+    Financial -.->|Search financial collection| Chroma
+    Chroma -.->|Financial docs| Financial
 
-    Chroma -.->|Relevant chunks| Financial
-    Chroma -.->|Relevant chunks| Technical
-    Chroma -.->|Relevant chunks| Market
+    Financial -->|3. Sequential Flow| Technical
+    Technical -.->|Search technical collection| Chroma
+    Chroma -.->|Technical docs| Technical
 
-    Financial -->|Update state| State
-    Technical -->|Update state| State
-    Market -->|Update state| State
+    Technical -->|4. Sequential Flow| Market
+    Market -.->|Search market collection| Chroma
+    Chroma -.->|Market docs| Market
 
-    Financial -.->|Retrieved data| System
-    Technical -.->|Retrieved data| System
-    Market -.->|Retrieved data| System
+    Market -->|5. Sequential Flow| Synthesis
+    Synthesis -.->|Build final report| User
 
-    System -->|Synthesize findings| Synthesis
-
-    Synthesis -->|Read state| State
-    Synthesis -.->|Final Report| User
+    System -.->|Final Report| User
 
     style System fill:#ffd700
-    style State fill:#d4edda
     style Blob fill:#cce5ff
     style Chroma fill:#cce5ff
+    style DocLoader fill:#e8f4f8
     style Financial fill:#e1f5ff
     style Technical fill:#fff4e1
     style Market fill:#ffe1e1
