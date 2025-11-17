@@ -206,3 +206,4 @@ __marimo__/
 # Project-specific generated data and logs
 project/solution/chroma_data/
 project/solution/logs/
+.vscode
