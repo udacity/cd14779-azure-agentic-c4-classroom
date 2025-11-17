@@ -9,7 +9,12 @@ Implement a modern multi-agent coffee shop system using **Semantic Kernel 1.37.0
 
 ![Architecture Diagram](architecture.png)
 
-Target architecture showing the modern coffee shop system you'll build using **KernelBaseModel** for state management and **ChatCompletionAgent** framework with four specialized agents (Order Manager, Barista Manager, Inventory Manager, Shop Coordinator) for intelligent coordination.
+Target architecture for the Coffee Shop system you'll build featuring:
+- **ModernCoffeeShopSystem** with shared kernel and CoffeeShopPlugin
+- **Shop Coordinator** for intelligent request routing and agent collaboration
+- **Three Specialist Agents**: Order Manager, Barista Manager, and Inventory Manager
+- **CoffeeShopState (KernelBaseModel)** managing Orders, Resources, and Inventory
+- Coordinator-based routing with bidirectional state access for real-time shop analytics
 
 ---
 

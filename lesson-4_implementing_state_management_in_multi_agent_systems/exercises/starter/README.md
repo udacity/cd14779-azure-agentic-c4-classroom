@@ -11,7 +11,11 @@ You'll implement **state management with KernelBaseModel** and create **speciali
 
 ![Architecture Diagram](architecture.png)
 
-Target architecture showing the modern project management system you'll build with shared state management across multiple agents using Semantic Kernel's latest agent framework.
+Target architecture for the Project Management system you'll build featuring:
+- **ProjectAgentManager** with shared kernel and ProjectManagementPlugin
+- **Three Specialist Agents**: Task Manager, Resource Manager, and Progress Tracker
+- **ProjectState (KernelBaseModel)** managing Tasks, Team Members, and Projects
+- Direct routing to specialists with bidirectional state access for real-time project analytics
 
 ---
 

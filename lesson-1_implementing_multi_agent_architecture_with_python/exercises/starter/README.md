@@ -12,7 +12,11 @@ This starter code provides the foundation for building an advanced multi-agent s
 
 ## 🏗️ System Architecture Framework
 
-![Architecture Diagram](architecture.png)
+### Parallel Mode - Independent Analysis
+![Parallel Mode](architecture_parallel.png)
+
+### Sequential Mode - Context-Aware Chain
+![Sequential Mode](architecture_sequential.png)
 
 The starter code provides the basic structure:
 - **SmartCityAgentManager** orchestrates agent interactions

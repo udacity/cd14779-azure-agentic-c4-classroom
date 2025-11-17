@@ -1,216 +1,256 @@
-# 🏦 Modern Bank Agentic Routing System
+# 🏦 Banking Multi-Agent System with Intelligent Routing
 
 ## 🌟 Overview
 
-This demo showcases an **advanced intelligent routing system** for banking services that leverages **Semantic Kernel 1.37.0** and **Azure OpenAI Foundry** to automatically direct customer requests to specialized AI agents. The system features **real-time Azure SQL integration** for data-driven responses and **AI-powered urgency detection** for optimal request handling.
+This demo introduces **intelligent routing and data flow** in multi-agent systems using **Semantic Kernel 1.37.0** and **Azure OpenAI**. It demonstrates how a routing agent can analyze customer requests using AI and direct them to specialized banking agents with **real-time Azure SQL integration** for context-enriched responses.
 
-## System Architecture
-
-![Architecture Diagram](architecture.png)
-
-This diagram illustrates the modern bank routing system with an intelligent routing agent that analyzes customer requests using AI and directs them to specialized agents (Account, Loan, Card, Emergency) with integrated Azure SQL Server data access for real-time transaction information.
-
----
-
-## 🏗️ Modern System Architecture
-
-### 🔹 Centralized Agent Manager
-
-* **BankAgentManager**
-  * Shared kernel instance with Azure OpenAI Foundry
-  * Unified runtime management with `InProcessRuntime`
-  * Coordinated agent orchestration and data flow
-  * Production-ready error handling and resource management
-
-### 🔹 Intelligent Routing System
-
-* **Routing Agent** with AI-Powered Analysis
-  * Analyzes customer requests using advanced NLP
-  * Determines specialist assignment with reasoning
-  * Classifies urgency levels (Low, Medium, High, Emergency)
-  * Provides context-aware routing decisions
-
-### 🔹 Specialized Banking Agents
-
-1. **🏦 Account Specialist** - Balance checks, transaction history, account management
-2. **💰 Loan Specialist** - Loan applications, mortgage inquiries, financing options  
-3. **💳 Card Specialist** - Credit/debit card services, fraud prevention, replacements
-4. **🚨 Emergency Specialist** - Urgent security issues, immediate action required
-
-### 🔹 Real-Time Data Integration
-
-* **BankDataConnector** with Azure SQL Server
-  * Live connection to `Example_Transactions` database
-  * Real-time balance calculations and transaction history
-  * Account data enrichment for context-aware responses
-  * Production-grade error handling and connection management
+**Key Concepts:**
+- **Intelligent Routing**: AI-powered request analysis and automatic specialist assignment
+- **Data Flow**: Real-time database integration for context-enriched responses
+- **Urgency Classification**: Automatic priority detection (Low/Medium/High/Emergency)
+- **Specialist Agents**: Four domain-specific agents (Account, Loan, Card, Emergency)
 
 ---
 
-## 🚀 Enhanced Workflow
+## 🏗️ System Architecture
 
-### Step 1: AI-Powered Request Analysis
+![Routing Architecture](architecture_routing.png)
 
-```
-Customer Request → Routing Agent (Azure OpenAI Analysis) → Specialist + Urgency + Reasoning
-```
+The routing architecture demonstrates **intelligent request distribution**:
 
-**Advanced Analysis Features:**
-- Natural language understanding of banking terminology
-- Context-aware urgency classification
-- Multi-factor specialist assignment
-- Detailed reasoning for routing decisions
+- **Routing Agent** analyzes customer requests using AI to determine specialist and urgency
+- Routes to appropriate **Specialist Agent** based on content analysis and keywords
+- **BankDataConnector** provides real-time Azure SQL data for context enrichment
+- Specialist agents process requests with enriched transaction data
+- Responses are personalized with live account information
 
-### Step 2: Intelligent Dynamic Routing
-
-**Routing Decision → Directs to Optimal Specialist:**
-
-* **Account Specialist** → Balance inquiries, transaction history, account management
-* **Loan Specialist** → Mortgage applications, personal loans, rate inquiries
-* **Card Specialist** → Card issues, replacements, fraud disputes  
-* **Emergency Specialist** → Security breaches, urgent fraud, immediate actions
-
-### Step 3: Data-Enhanced Specialist Processing
-
-**Specialist Agent + Azure SQL Data → Personalized Response:**
-
-* Real-time transaction data integration
-* Account-specific balance calculations
-- Contextual financial advice
-* Actionable next steps with data validation
+**Key Pattern:** Unlike sequential or parallel orchestration (Lessons 1-2), routing uses **AI-powered content analysis** to dynamically assign requests to the best specialist.
 
 ---
 
-## 📊 Modern Data Flow
+## 🔧 Critical Code Sections
 
-```text
-Customer Request (Natural Language)
-↓
-Routing Agent (Azure OpenAI Analysis)
-    ├── Specialist Determination
-    ├── Urgency Classification  
-    └── Routing Reasoning
-↓
-Specialist Agent + Azure SQL Data Connector
-    ├── Real-time Transaction Data
-    ├── Account Balance Calculations
-    └── Historical Context
-↓
-Data-Driven Personalized Response
-    ├── Account-Specific Information
-    ├── Actionable Recommendations
-    └── Next Steps with Validation
+### 1. Routing Agent with AI-Powered Analysis
+**Location:** `bank_routing_demo.py:251-278`
+
+Configuring the routing agent to analyze requests and make routing decisions:
+
+```python
+"router": ChatCompletionAgent(
+    kernel=self.kernel,
+    name="Routing_Agent",
+    description="Intelligent router for banking request distribution",
+    instructions="""You are an intelligent routing agent. Analyze banking requests and route to appropriate specialists.
+
+    Analyze each request and determine:
+    1. Which specialist should handle it (account/loan/card/emergency)
+    2. The urgency level (Low/Medium/High/Emergency)
+    3. Brief reasoning for your decision
+
+    Specialist Responsibilities:
+    - account: Account balances, transactions, account information, transfers
+    - loan: Loan applications, mortgages, personal loans, interest rates, financing
+    - card: Credit/debit card issues, lost cards, card applications, disputes
+    - emergency: Fraud, stolen cards, urgent account issues, security breaches
+
+    Urgency Guidelines:
+    - Low: General inquiries, information requests, product questions
+    - Medium: Service requests, application status, routine issues
+    - High: Time-sensitive issues, payment problems, card declines
+    - Emergency: Fraud, security breaches, lost/stolen cards, unauthorized transactions
+
+    Respond in this exact format:
+    Specialist: [account/loan/card/emergency]
+    Urgency: [Low/Medium/High/Emergency]
+    Reasoning: [brief explanation]"""
+)
 ```
 
+**Why this matters:** This is THE core of intelligent routing - the routing agent uses AI to understand request content, classify urgency, and determine the best specialist. The structured format ensures consistent routing decisions that can be parsed programmatically.
+
 ---
 
-## 🛠️ Modern Setup Instructions
+### 2. AI-Powered Routing Decision Process
+**Location:** `bank_routing_demo.py:283-302`
 
-### 1. Installation with Latest Dependencies
+How the routing agent analyzes requests and makes decisions:
 
+```python
+async def route_customer_request(self, customer_request: str) -> dict:
+    """Intelligent routing of customer requests to appropriate specialists"""
+    print(f"📥 Customer Request: {customer_request}")
+    print("🔄 Analyzing request and determining routing...")
+
+    # Use routing agent to analyze the request
+    routing_prompt = f"CUSTOMER REQUEST: {customer_request}"
+
+    routing_response = await self.agents["router"].get_response(routing_prompt)
+    routing_content = str(routing_response.content)
+
+    # Parse routing decision
+    routing_decision = self._parse_routing_decision(routing_content)
+
+    print(f"✅ Routing Decision:")
+    print(f"   Specialist: {routing_decision['specialist']}")
+    print(f"   Urgency: {routing_decision['urgency']}")
+    print(f"   Reasoning: {routing_decision['reasoning']}")
+
+    return routing_decision
+```
+
+**Why this matters:** Shows how to use an AI agent as a router rather than hard-coded rules. The routing agent uses natural language understanding to make intelligent decisions, providing transparency through reasoning explanations.
+
+---
+
+### 3. Parsing Structured Routing Decisions
+**Location:** `bank_routing_demo.py:304-323`
+
+Extracting structured information from AI routing response:
+
+```python
+def _parse_routing_decision(self, routing_text: str) -> dict:
+    """Parse the routing decision from the AI response"""
+    lines = routing_text.strip().split('\n')
+    decision = {
+        "specialist": "account",  # default
+        "urgency": "Medium",      # default
+        "reasoning": "Unable to parse routing decision",
+        "raw_response": routing_text
+    }
+
+    for line in lines:
+        line = line.strip()
+        if line.startswith('Specialist:'):
+            decision["specialist"] = line.split(':')[1].strip().lower()
+        elif line.startswith('Urgency:'):
+            decision["urgency"] = line.split(':')[1].strip()
+        elif line.startswith('Reasoning:'):
+            decision["reasoning"] = line.split(':')[1].strip()
+
+    return decision
+```
+
+**Why this matters:** Demonstrates how to extract structured data from AI responses. By instructing the routing agent to use a specific format, we can reliably parse routing decisions programmatically while maintaining flexibility for AI reasoning.
+
+---
+
+### 4. Data-Enriched Specialist Processing
+**Location:** `bank_routing_demo.py:325-353`
+
+Context enrichment with real-time Azure SQL data:
+
+```python
+async def process_with_specialist(self, customer_request: str, specialist: str, urgency: str) -> str:
+    """Process customer request with the appropriate specialist"""
+    print(f"🔧 Connecting to {specialist} specialist...")
+
+    # Get relevant transaction data for context
+    accounts = self.data_connector.get_accounts()
+    transaction_context = ""
+
+    if specialist == "account":
+        # Provide transaction data for account inquiries
+        recent_transactions = []
+        for account in accounts[:2]:  # Show data for first 2 accounts
+            transactions = self.data_connector.get_recent_transactions(account, 3)
+            balance = self.data_connector.get_account_balance(account)
+            recent_transactions.append(f"Account {account} (Balance: ${balance:.2f}): {transactions}")
+
+        transaction_context = f"\n\nACCOUNT DATA CONTEXT:\n" + "\n".join(recent_transactions)
+
+    # Add urgency context for emergency situations
+    urgency_context = ""
+    if urgency in ["High", "Emergency"]:
+        urgency_context = f"\n\n🚨 URGENCY: {urgency} - Requiring immediate attention"
+
+    # Process request with specialist agent
+    full_request = f"CUSTOMER REQUEST: {customer_request}{transaction_context}{urgency_context}"
+
+    specialist_response = await self.agents[specialist].get_response(full_request)
+
+    return f"🏦 **{specialist.capitalize()} Assistance**\n\n{specialist_response.content}"
+```
+
+**Why this matters:** Shows how to enrich agent context with real-time data based on the routing decision. Account specialists get transaction data from Azure SQL, while emergency requests get urgency flags - demonstrating data flow from database to AI response.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Installation
 ```bash
 pip install semantic-kernel==1.37.0 python-dotenv pyodbc
+# Install ODBC driver for macOS
+brew install unixodbc
 ```
 
-### 2. Environment Configuration
-
-Create a `.env` file with Azure services:
-
+### 2. Azure Configuration
+Create `.env` file in the repository root:
 ```env
-# Azure OpenAI Foundry Configuration
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-foundry-deployment
+# Azure OpenAI Configuration
+AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment
 AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-foundry-api-key
+AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
 
 # Azure SQL Database Configuration
 AZURE_SQL_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=your-server.database.windows.net;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;
 ```
 
 ### 3. Database Setup
+Execute SQL schema using `create_example_transaction_table.sql` and insert data using `insert_example_transaction_query.sql` in your Azure SQL database.
 
-Execute the SQL schema in your Azure SQL database:
-
-```sql
-CREATE TABLE Example_Transactions (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    account_id NVARCHAR(50) NOT NULL,
-    type NVARCHAR(50) NOT NULL,
-    amount DECIMAL(15,2) NOT NULL,
-    date DATETIME2 NOT NULL,
-    status NVARCHAR(20) NOT NULL,
-    description NVARCHAR(MAX)
-);
-
--- Insert sample transaction data
-INSERT INTO Example_Transactions (account_id, type, amount, date, status, description)
-VALUES 
-('ACC001', 'deposit', 1000.00, GETDATE(), 'completed', 'Initial account funding'),
-('ACC001', 'withdrawal', 150.50, GETDATE(), 'completed', 'ATM withdrawal'),
-('ACC002', 'deposit', 500.00, GETDATE(), 'completed', 'Payroll deposit'),
-('ACC003', 'deposit', 2500.00, GETDATE(), 'completed', 'Bonus payment');
-```
-
-### 4. Run the Modern Demo
-
+### 4. Run the Demo
 ```bash
-python modern_bank_routing.py
+cd lesson-3_implementing_routing_and_data_flow_in_agentic_systems/demo
+source ../../.venv/bin/activate
+uv run bank_routing_demo.py
 ```
 
 ---
 
-## 🎯 Enhanced Demo Scenarios
+## 📊 System Components
 
-### **Account Services with Real Data**
-* "Check my account balance and recent transactions for ACC001"
-* "Show me transaction history from the past week"
-* "What's my current balance across all accounts?"
+### Five Specialized Agents
 
-### **Loan Services with Current Rates**
-* "I want to apply for a home loan with current mortgage rates"
-* "What are the requirements for a $10,000 personal loan?"
-* "Compare different loan options for my situation"
+1. **🔄 Routing Agent** - AI-powered request analysis and specialist assignment
+2. **🏦 Account Specialist** - Balance checks, transaction history, account management
+3. **💰 Loan Specialist** - Loan applications, mortgage inquiries, financing options
+4. **💳 Card Specialist** - Credit/debit card services, fraud prevention, replacements
+5. **🚨 Emergency Specialist** - Urgent security issues, immediate action required
 
-### **Card Services with Security**
-* "My credit card was stolen this morning - need immediate replacement"
-* "Dispute a suspicious transaction from yesterday"
-* "Request a new debit card with expedited shipping"
+### BankAgentManager
 
-### **Emergency Situations with Urgent Actions**
-* "Fraudulent transactions detected on my account - need immediate freeze"
-* "Unauthorized access to my banking information"
-* "Lost wallet with all cards - emergency cancellation required"
+The central orchestration hub that:
+- Manages a shared Kernel instance with Azure OpenAI service
+- Initializes all 5 specialized ChatCompletionAgent instances
+- Implements intelligent routing with AI-powered analysis
+- Handles real-time Azure SQL database integration
+- Manages runtime lifecycle with InProcessRuntime
 
----
+### BankDataConnector
 
-## 🔧 Advanced Features
-
-### Modern Semantic Kernel 1.37.0
-* **ChatCompletionAgent Framework**: Latest agent patterns with structured instructions
-* **Shared Kernel Architecture**: Single Azure OpenAI Foundry instance for all agents
-* **InProcessRuntime Management**: Proper lifecycle and resource handling
-* **Async/Await Optimization**: Concurrent request processing for performance
-
-### Intelligent AI Routing
-* **Content-Based Analysis**: Advanced NLP for banking terminology understanding
-* **Multi-Factor Urgency Detection**: Context-aware priority classification
-* **Reasoning-Based Decisions**: Transparent routing logic with explanations
-* **Dynamic Specialist Matching**: Optimal agent selection based on expertise
-
-### Real-Time Data Integration
-* **Azure SQL Live Connection**: Real-time transaction data access
-* **Automatic Balance Calculations**: Current account status computations
-* **Transaction Context Enrichment**: Data-driven response personalization
-* **Database Operation Logging**: Comprehensive audit and error tracking
-
-### Production-Ready Architecture
-* **Comprehensive Error Handling**: Graceful degradation for all components
-* **Resource Optimization**: Shared connections and efficient memory usage
-* **Scalable Agent Framework**: Easy addition of new banking specialists
-* **Professional Logging**: Detailed progress tracking and decision visibility
+Real-time data integration layer:
+- Connects to Azure SQL Example_Transactions table
+- Provides balance calculations and transaction history
+- Enriches specialist agent context with live data
+- Handles database connection lifecycle
 
 ---
 
-## 📋 Enhanced Sample Output
+## 💡 Routing Patterns
+
+| Request Type | Specialist | Urgency | Example |
+|------|--------|----------------|----------|
+| **Account Inquiry** | Account | Low | "Check my balance for ACC001" |
+| **Loan Application** | Loan | Medium | "Apply for $10,000 personal loan" |
+| **Card Issue** | Card | Medium | "Request new debit card" |
+| **Security Breach** | Emergency | Emergency | "My credit card was stolen" |
+
+**Key Difference from Lessons 1-2:** Instead of pre-defined orchestration patterns (sequential/parallel/conditional), routing uses **AI analysis** to dynamically determine which specialist should handle each request.
+
+---
+
+## 📝 Example Output
 
 ```text
 🏦 BANKING MULTI-AGENT SYSTEM - COMPLETE SOLUTION
@@ -259,67 +299,31 @@ Would you like more details about any specific transaction or additional account
 
 ---
 
-## 🎪 Advanced Routing Logic
+## 🎯 Key Learning Points
 
-### AI-Powered Content Analysis
+### Intelligent Routing Fundamentals
+- **AI-Powered Router Agent**: Using an agent to analyze and route requests vs hard-coded rules
+- **Structured AI Responses**: Instructing agents to return parseable, structured output
+- **Urgency Classification**: Automatic priority detection based on request content
+- **Transparent Reasoning**: AI provides explanations for routing decisions
 
-| Request Pattern | Specialist | AI Detection Keywords | Data Integration |
-|----------------|------------|----------------------|------------------|
-| Account Info | Account Specialist | "balance", "transactions", "account history", "statement" | Real-time transaction data & balances |
-| Loan Services | Loan Specialist | "loan", "mortgage", "interest rate", "financing", "apply" | Current rate tables & eligibility |
-| Card Issues | Card Specialist | "card", "debit", "credit", "stolen", "replacement", "dispute" | Card status & transaction verification |
-| Urgent Matters | Emergency Specialist | "fraud", "stolen", "emergency", "urgent", "unauthorized", "security" | Immediate account actions & security protocols |
+### Data Flow Patterns
+- **Context Enrichment**: Adding real-time database data to agent context
+- **Conditional Data Loading**: Only loading relevant data based on specialist type
+- **Azure SQL Integration**: Real-time transaction data access with PyODBC
+- **Database Connection Management**: Proper lifecycle with context managers
 
-### Sophisticated Urgency Classification
-
-* **🟢 Low**: General information requests, product inquiries, rate checks
-* **🟡 Medium**: Service applications, status inquiries, routine card requests  
-* **🟠 High**: Time-sensitive issues, payment problems, card declines, disputes
-* **🔴 Emergency**: Security breaches, fraud alerts, lost/stolen cards, unauthorized access
-
-### Context-Aware Data Enrichment
-
-* **Account Requests**: Automatic balance calculations + recent transactions
-* **Loan Inquiries**: Current rate context + eligibility assessment
-* **Card Services**: Card status verification + fraud pattern checking
-* **Emergency**: Immediate security protocols + account protection measures
+### Production Best Practices
+- **Shared Kernel Pattern**: Single kernel serves all agents (router + 4 specialists)
+- **Error Handling**: Graceful degradation for database and routing failures
+- **Parsing Flexibility**: Defaults for unparseable AI responses
+- **Modern Framework**: Uses latest Semantic Kernel 1.37.0 ChatCompletionAgent API
 
 ---
 
-## 🔄 Extension Opportunities
+## 📖 Learn More
 
-### Additional Banking Specialists
-* **📱 Digital Banking Agent**: Mobile app support, online banking issues
-* **🏠 Mortgage Specialist**: Complex home loan scenarios, refinancing
-* **💼 Business Banking Agent**: Commercial accounts, business services
-* **🌍 International Agent**: Foreign transactions, currency exchange
-
-### Advanced Integration Features
-* **Real-time Fraud Detection**: AI-powered suspicious activity monitoring
-* **Predictive Analytics**: Spending patterns and financial health insights
-* **Multi-Channel Support**: Chat, voice, and email integration
-* **Personalized Offers**: Targeted product recommendations based on behavior
-
-### Enterprise Enhancements
-* **Multi-tenant Architecture**: Support for multiple bank branches
-* **Compliance Monitoring**: Regulatory requirement automation
-* **Performance Analytics**: Agent performance and routing efficiency metrics
-* **Disaster Recovery**: High availability and backup routing systems
-
----
-
-## 🚀 Performance Benefits
-
-### Modern Architecture Advantages
-* **50% Faster Response Times**: Shared kernel and optimized async processing
-* **Real-time Data Accuracy**: Live Azure SQL integration eliminates data staleness
-* **Scalable Agent Management**: Easy addition of new specialists without system changes
-* **Production Reliability**: Comprehensive error handling and graceful degradation
-
-### Business Value
-* **Improved Customer Satisfaction**: Accurate, data-driven responses
-* **Reduced Handling Time**: AI-powered routing eliminates manual triage
-* **Enhanced Security**: Immediate emergency detection and response
-* **Operational Efficiency**: Automated routine inquiries free human agents for complex issues
-
----
+For more information about Semantic Kernel and multi-agent systems, visit:
+- [Semantic Kernel Documentation](https://learn.microsoft.com/en-us/semantic-kernel/)
+- [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
+- [Azure SQL Database](https://azure.microsoft.com/en-us/products/azure-sql/database/)

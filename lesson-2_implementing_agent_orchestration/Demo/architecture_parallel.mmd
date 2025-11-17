@@ -1,0 +1,39 @@
+graph TB
+    User["👤 User Request<br/>'2-week cultural trip to Europe'"]
+
+    subgraph Manager["TravelAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service"]
+        Runtime["asyncio.gather()<br/>Concurrent Execution"]
+    end
+
+    subgraph Parallel["PARALLEL PATTERN: All Agents Work Simultaneously"]
+        Agent1["🗺️ Destination Expert<br/>Independent Analysis"]
+        Agent2["✈️ Flight Expert<br/>Independent Analysis"]
+        Agent3["🏨 Accommodation Expert<br/>Independent Analysis"]
+        Agent4["🎭 Activities Expert<br/>Independent Analysis"]
+    end
+
+    Results["📊 Combined Results<br/>All Recommendations<br/>Displayed Together"]
+
+    User -->|Travel Request| Manager
+
+    Manager -->|Concurrent| Agent1
+    Manager -->|Concurrent| Agent2
+    Manager -->|Concurrent| Agent3
+    Manager -->|Concurrent| Agent4
+
+    Agent1 -->|Results| Results
+    Agent2 -->|Results| Results
+    Agent3 -->|Results| Results
+    Agent4 -->|Results| Results
+
+    Results -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Runtime fill:#ffb366,stroke:#333,stroke-width:2px
+    style Agent1 fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Agent2 fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Agent3 fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Agent4 fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Results fill:#ffeb99,stroke:#333,stroke-width:3px

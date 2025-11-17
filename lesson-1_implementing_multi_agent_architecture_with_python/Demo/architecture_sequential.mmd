@@ -1,0 +1,33 @@
+graph TB
+    User["👤 User Request<br/>'Major subway line construction project'"]
+
+    subgraph Manager["SmartCityAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service<br/>+ InProcessRuntime"]
+    end
+
+    subgraph Sequential["SEQUENTIAL MODE: Context-Aware Chain"]
+        Step1["Step 1<br/>🚦 Traffic Manager<br/>Analyzes traffic impact"]
+        Step2["Step 2<br/>⚡ Energy Analyst<br/>Uses traffic context"]
+        Step3["Step 3<br/>🚨 Safety Officer<br/>Uses traffic + energy context"]
+        Step4["Step 4<br/>👔 City Coordinator<br/>Synthesizes all inputs"]
+    end
+
+    Result["📄 Comprehensive Integrated<br/>City Infrastructure Plan"]
+
+    User -->|Scenario| Manager
+    Manager -->|Sequential Execution| Step1
+
+    Step1 -->|"Context Building"| Step2
+    Step2 -->|"+ Traffic Context"| Step3
+    Step3 -->|"+ Energy Context"| Step4
+
+    Step4 -->|Final Plan| Result
+    Result -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Step1 fill:#a8d5ff,stroke:#333,stroke-width:2px
+    style Step2 fill:#b8e0ff,stroke:#333,stroke-width:2px
+    style Step3 fill:#c8ebff,stroke:#333,stroke-width:2px
+    style Step4 fill:#90ee90,stroke:#333,stroke-width:3px
+    style Result fill:#ffeb99,stroke:#333,stroke-width:3px

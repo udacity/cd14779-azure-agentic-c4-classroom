@@ -1,0 +1,35 @@
+graph TB
+    User["👤 User Request<br/>'Heavy traffic congestion on Main Street'"]
+
+    subgraph Manager["SmartCityAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service"]
+        Runtime["asyncio.gather()<br/>Concurrent Execution"]
+    end
+
+    subgraph Parallel["PARALLEL MODE: Independent Analysis"]
+        Agent1["🚦 Traffic Manager<br/>Independent Analysis"]
+        Agent2["⚡ Energy Analyst<br/>Independent Analysis"]
+        Agent3["🚨 Safety Officer<br/>Independent Analysis"]
+    end
+
+    Results["📊 Combined Results<br/>All Analyses<br/>Displayed Together"]
+
+    User -->|Scenario| Manager
+
+    Manager -->|Concurrent| Agent1
+    Manager -->|Concurrent| Agent2
+    Manager -->|Concurrent| Agent3
+
+    Agent1 -->|Results| Results
+    Agent2 -->|Results| Results
+    Agent3 -->|Results| Results
+
+    Results -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Runtime fill:#ffb366,stroke:#333,stroke-width:2px
+    style Agent1 fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Agent2 fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Agent3 fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Results fill:#ffeb99,stroke:#333,stroke-width:3px

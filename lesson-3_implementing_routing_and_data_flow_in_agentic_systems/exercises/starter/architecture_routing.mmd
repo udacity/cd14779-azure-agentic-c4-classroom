@@ -1,0 +1,42 @@
+graph TB
+    User["👤 Patient Request<br/>'Severe chest pain and difficulty breathing'"]
+
+    subgraph Manager["MedicalAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service"]
+    end
+
+    Router["🔄 Medical Routing Agent<br/>AI-Powered Triage<br/>+ Specialist Determination<br/>+ Urgency Classification"]
+
+    subgraph Specialists["Medical Specialist Agents"]
+        General["👨‍⚕️ General Practitioner<br/>Routine Symptoms & Care"]
+        Emergency["🚨 Emergency Specialist<br/>Critical & Urgent Cases"]
+        Pediatric["👶 Pediatric Specialist<br/>Children's Health"]
+    end
+
+    DataConnector["💾 PatientDataConnector<br/>Azure SQL Database<br/>+ Patient Records<br/>+ Medical History<br/>+ Visit Logging"]
+
+    Response["📄 Medical Assessment<br/>with Patient Context"]
+
+    User -->|Patient Symptoms| Manager
+    Manager -->|AI Triage| Router
+
+    Router -->|"Specialist: emergency<br/>Urgency: Emergency"| Emergency
+    Router -.->|Route to| General
+    Router -.->|Route to| Pediatric
+
+    Emergency <-->|Patient History| DataConnector
+    General <-.->|Patient History| DataConnector
+    Pediatric <-.->|Patient History| DataConnector
+
+    Emergency -->|Diagnosis + Logging| DataConnector
+    Emergency -->|Medical Response| Response
+    Response -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Router fill:#ffb366,stroke:#333,stroke-width:3px
+    style Emergency fill:#ff6b6b,stroke:#333,stroke-width:3px
+    style General fill:#90ee90,stroke:#333,stroke-width:2px
+    style Pediatric fill:#b8e0ff,stroke:#333,stroke-width:2px
+    style DataConnector fill:#d4edda,stroke:#333,stroke-width:3px
+    style Response fill:#ffeb99,stroke:#333,stroke-width:3px

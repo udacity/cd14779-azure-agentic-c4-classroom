@@ -16,7 +16,12 @@ This demo teaches you how to:
 
 ![Architecture Diagram](architecture.png)
 
-Modern bookstore system with four intelligent agents (Inventory, Sales, Recommendation, Coordinator) sharing state through KernelBaseModel with real-time analytics and kernel function integration.
+This diagram shows the complete Book Store multi-agent system architecture featuring:
+- **BookStoreAgentManager** with shared kernel and StoreOperationsPlugin
+- **Store Coordinator** for intelligent request routing
+- **Three Specialist Agents**: Inventory Manager, Sales Manager, and Recommendation Engine
+- **StoreState (KernelBaseModel)** managing Books, Customers, Orders, and Store Metrics
+- Bidirectional state access with kernel functions for real-time analytics
 
 ---
 

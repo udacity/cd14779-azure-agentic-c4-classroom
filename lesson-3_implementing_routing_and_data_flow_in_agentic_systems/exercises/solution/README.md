@@ -1,14 +1,30 @@
 # 🏥 Hospital Triage Multi-Agent System - Complete Solution
 
-## 🌟 Solution Overview
+## 🌟 Overview
 
-This is a complete **intelligent hospital triage system** built with **Semantic Kernel 1.37.0** that demonstrates AI-powered medical routing with **Azure SQL Server integration**. The system automatically directs patient requests to specialized medical agents and maintains comprehensive patient records.
+This solution **adapts the banking routing demo to healthcare**, demonstrating how intelligent routing patterns transfer across domains. Built with **Semantic Kernel 1.37.0** and **Azure SQL**, it shows AI-powered medical triage with specialized healthcare agents and patient record integration.
 
-## System Architecture
+**Key Adaptations from Banking Demo:**
+- **Three Medical Specialists** (General, Emergency, Pediatric) vs four banking specialists
+- **Medical Urgency Levels** (Routine/Urgent/Emergency) vs banking priorities
+- **Patient Data Integration** (medical history, conditions) vs transaction data
+- **Healthcare Context** (symptoms, diagnoses) vs financial context
 
-![Architecture Diagram](architecture.png)
+---
 
-This diagram illustrates the complete hospital triage routing system with intelligent triage routing that directs patient requests to specialized medical agents (General Practice, Emergency, Pediatric) with Azure SQL Server data connector integration for patient history and visit logging.
+## 🏗️ System Architecture
+
+![Medical Routing Architecture](architecture_routing.png)
+
+The medical triage architecture demonstrates **domain adaptation of routing**:
+
+- **Medical Routing Agent** analyzes patient symptoms using AI to determine specialist and urgency
+- Routes to appropriate **Medical Specialist** (General, Emergency, or Pediatric)
+- **PatientDataConnector** provides real-time patient history from Azure SQL
+- Specialist agents process requests with enriched medical context
+- Responses include personalized care with patient history consideration
+
+**Key Pattern:** Same AI-powered routing architecture as banking demo, but adapted for healthcare domain with medical terminology, urgency classification, and patient data.
 
 ---
 

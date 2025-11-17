@@ -6,7 +6,7 @@ Transform this starter code into a complete **intelligent hospital triage system
 
 ## System Architecture
 
-![Architecture Diagram](architecture.png)
+![Medical Routing Architecture](architecture_routing.png)
 
 This diagram depicts the modern hospital triage system architecture featuring intelligent patient request routing to specialized medical agents with integrated Azure SQL Server data connector for patient records and visit history management.
 

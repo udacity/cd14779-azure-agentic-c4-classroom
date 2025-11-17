@@ -1,0 +1,38 @@
+graph TB
+    User["👤 User Request<br/>'Where can I find cheap Italian food?'"]
+
+    subgraph Manager["RestaurantAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service"]
+        Analyzer["🔍 Smart Routing Logic<br/>Keyword-Based Analysis"]
+    end
+
+    subgraph Routing["CONDITIONAL PATTERN: Smart Agent Selection"]
+        Decision{"Smart Routing Logic<br/>Which agents are needed?"}
+
+        Agent1["🍽️ Cuisine Expert<br/>✅ SELECTED"]
+        Agent2["📍 Location Expert<br/>NOT NEEDED"]
+        Agent3["💰 Price Expert<br/>✅ SELECTED"]
+    end
+
+    Results["📋 Focused Results<br/>Only Cuisine & Price<br/>Recommendations"]
+
+    User -->|Dining Request| Manager
+    Manager -->|Analyze Request| Analyzer
+    Analyzer -->|Route Based on Need| Decision
+
+    Decision -->|Execute| Agent1
+    Decision -.->|Not Needed| Agent2
+    Decision -->|Execute| Agent3
+
+    Agent1 -->|Targeted Results| Results
+    Agent3 -->|Targeted Results| Results
+    Results -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Analyzer fill:#d5ffa8,stroke:#333,stroke-width:3px
+    style Decision fill:#90ee90,stroke:#333,stroke-width:3px
+    style Agent1 fill:#d5ffa8,stroke:#333,stroke-width:3px
+    style Agent2 fill:#ddd,stroke:#999,stroke-width:1px,stroke-dasharray: 5 5
+    style Agent3 fill:#d5ffa8,stroke:#333,stroke-width:3px
+    style Results fill:#ffeb99,stroke:#333,stroke-width:3px

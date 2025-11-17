@@ -1,27 +1,58 @@
 graph TB
-    User[User/Book Store System]
+    User["👤 User Request<br/>'Show me inventory status and low stock books'"]
 
-    State[Shared Store State<br/>Pydantic Models:<br/>Books, Customers, Orders<br/>Store Balance, Revenue]
-
-    subgraph "Book Store Multi-Agent System"
-        Inventory[Inventory Agent<br/>📚 Inventory Manager<br/>Semantic Kernel Instance]
-        Sales[Sales Agent<br/>💰 Sales Manager<br/>Semantic Kernel Instance]
-        Recommendation[Recommendation Agent<br/>⭐ Recommendation Specialist<br/>Semantic Kernel Instance]
+    subgraph Manager["BookStoreAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service<br/>+ StoreOperationsPlugin"]
     end
 
-    User -->|Request| Inventory
-    User -->|Request| Sales
-    User -->|Request| Recommendation
+    Coordinator["🔄 Store Coordinator<br/>Routes to Specialist<br/>Analyzes Request"]
+
+    subgraph Specialists["Specialist Agents with State Access"]
+        Inventory["📚 Inventory Manager<br/>Stock Control & Analytics"]
+        Sales["💰 Sales Manager<br/>Revenue & Customers"]
+        Recommendations["🎯 Recommendation Engine<br/>Personalized Suggestions"]
+    end
+
+    subgraph State["StoreState (KernelBaseModel)"]
+        Books["📖 Books Dict<br/>+ check_availability()<br/>+ get_book_info()"]
+        Customers["👥 Customers Dict<br/>+ check_vip_status()<br/>+ get_customer_profile()"]
+        Orders["🛒 Orders Dict<br/>+ update_order_status()<br/>+ get_order_summary()"]
+        Metrics["📊 Store Metrics<br/>Balance, Revenue, Analytics"]
+    end
+
+    Response["📄 Specialist Response<br/>with Current State Data<br/>+ ChatHistory Context"]
+
+    User -->|Store Request| Manager
+    Manager -->|Route| Coordinator
+
+    Coordinator -->|Primary Agent| Inventory
+    Coordinator -.->|Or Route to| Sales
+    Coordinator -.->|Or Route to| Recommendations
 
     Inventory <-->|Read/Write State| State
-    Sales <-->|Read/Write State| State
-    Recommendation <-->|Read/Write State| State
+    Sales <-.->|Read State| State
+    Recommendations <-.->|Read State| State
 
-    Inventory -.->|Response| User
-    Sales -.->|Response| User
-    Recommendation -.->|Response| User
+    State -->|State Data| Books
+    State -->|State Data| Customers
+    State -->|State Data| Orders
+    State -->|State Data| Metrics
 
-    style State fill:#ffd700
-    style Inventory fill:#e1f5ff
-    style Sales fill:#fff4e1
-    style Recommendation fill:#ffe1e1
+    Inventory -->|Response + Analytics| Response
+    Sales -.->|Response + Analytics| Response
+    Recommendations -.->|Response + Analytics| Response
+
+    Response -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Coordinator fill:#ffb366,stroke:#333,stroke-width:3px
+    style Inventory fill:#90ee90,stroke:#333,stroke-width:3px
+    style Sales fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Recommendations fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style State fill:#d4edda,stroke:#333,stroke-width:4px
+    style Books fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style Customers fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style Orders fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style Metrics fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style Response fill:#ffeb99,stroke:#333,stroke-width:3px

@@ -9,7 +9,12 @@ This complete **modern coffee shop system** demonstrates sophisticated **state m
 
 ![Architecture Diagram](architecture.png)
 
-Modern coffee shop system with four intelligent agents (Order Manager, Barista Manager, Inventory Manager, Shop Coordinator) sharing state through KernelBaseModel with real-time production analytics and kernel function integration.
+This diagram shows the complete Coffee Shop multi-agent system architecture featuring:
+- **ModernCoffeeShopSystem** with shared kernel and CoffeeShopPlugin
+- **Shop Coordinator** for intelligent request routing and agent collaboration
+- **Three Specialist Agents**: Order Manager, Barista Manager, and Inventory Manager
+- **CoffeeShopState (KernelBaseModel)** managing Orders, Resources, and Inventory
+- Coordinator-based routing with bidirectional state access for real-time shop analytics
 
 ---
 

@@ -13,7 +13,14 @@ This starter code provides the foundation for building an advanced multi-agent r
 
 ## 🏗️ System Architecture Framework
 
-![Architecture Diagram](architecture.png)
+### Sequential Pattern - Context-Aware Chain
+![Sequential Pattern](architecture_sequential.png)
+
+### Parallel Pattern - Maximum Efficiency
+![Parallel Pattern](architecture_parallel.png)
+
+### Conditional Pattern - Smart Agent Selection
+![Conditional Pattern](architecture_conditional.png)
 
 The starter code provides the basic structure:
 - **RestaurantAgentManager** orchestrates agent interactions
