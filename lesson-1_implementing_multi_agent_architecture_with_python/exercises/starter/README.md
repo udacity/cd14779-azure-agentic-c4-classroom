@@ -108,9 +108,9 @@ pip install semantic-kernel==1.37.0 python-dotenv
 Create `.env` file:
 
 ```env
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-foundry-deployment
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+AZURE_DEPLOYMENT_NAME=your-foundry-deployment
+AZURE_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_DEPLOYMENT_KEY=your-api-key
 ```
 
 ### 3. Run the Starter Code

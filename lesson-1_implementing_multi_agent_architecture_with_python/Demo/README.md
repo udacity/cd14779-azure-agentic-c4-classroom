@@ -153,9 +153,9 @@ pip install semantic-kernel==1.37.0 python-dotenv
 ### 2. Azure OpenAI Configuration
 Create `.env` file in the repository root:
 ```env
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+AZURE_DEPLOYMENT_NAME=your-deployment
+AZURE_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_DEPLOYMENT_KEY=your-api-key
 ```
 
 ### 3. Run the Demo
