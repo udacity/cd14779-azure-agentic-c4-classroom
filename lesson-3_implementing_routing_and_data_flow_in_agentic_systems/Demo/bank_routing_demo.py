@@ -9,7 +9,7 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
 
-load_dotenv("../../.env")
+load_dotenv("../.env")
 
 class BankDataConnector:
     """Data connector for bank transactions from Azure SQL Server"""
@@ -176,9 +176,9 @@ class BankAgentManager:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="azure_banking_chat",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+                deployment_name=os.environ["AZURE_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_DEPLOYMENT_KEY"]
             )
         )
         
@@ -395,9 +395,9 @@ async def main():
     
     # Validate environment setup
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY",
+        "AZURE_DEPLOYMENT_NAME",
+        "AZURE_DEPLOYMENT_ENDPOINT", 
+        "AZURE_DEPLOYMENT_KEY",
         "AZURE_SQL_CONNECTION_STRING"
     ]
     

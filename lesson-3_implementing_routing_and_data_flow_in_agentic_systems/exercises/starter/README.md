@@ -119,9 +119,9 @@ Create a `.env` file with your Azure services:
 
 ```env
 # Azure OpenAI Configuration
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+AZURE_DEPLOYMENT_NAME=your-deployment-name
+AZURE_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_DEPLOYMENT_KEY=your-api-key
 
 # Azure SQL Database Configuration
 AZURE_SQL_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=your-server.database.windows.net;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;
