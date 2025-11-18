@@ -137,15 +137,15 @@ async def main():
     # Complex collaborative scenario (sequential processing)
     complex_scenario = """MAJOR CITY INFRASTRUCTURE PROJECT:
 
-The city is planning a new subway line construction that will:
-1. Require 2 years of phased construction
-2. Affect major traffic arteries during construction  
-3. Increase energy demands for construction equipment
-4. Require safety planning for construction zones and public access
-5. Need long-term urban planning integration
-6. Has long-term environmental impact considerations
+    The city is planning a new subway line construction that will:
+    1. Require 2 years of phased construction
+    2. Affect major traffic arteries during construction  
+    3. Increase energy demands for construction equipment
+    4. Require safety planning for construction zones and public access
+    5. Need long-term urban planning integration
+    6. Has long-term environmental impact considerations
 
-All departments must collaborate on a comprehensive plan."""
+    All departments must collaborate on a comprehensive plan."""
     
     print("\n" + "=" * 60)
     print("🚀 Sequential Collaboration (Complete TODOs to enable)")
