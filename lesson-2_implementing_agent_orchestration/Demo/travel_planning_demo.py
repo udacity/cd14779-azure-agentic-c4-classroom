@@ -6,7 +6,7 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
 
-load_dotenv("../../.env")
+load_dotenv("../.env")
 
 class TravelAgentManager:
     """Modern travel agent manager using Semantic Kernel 1.37.0 agent framework"""
@@ -19,9 +19,9 @@ class TravelAgentManager:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="azure_travel_chat",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+                deployment_name=os.environ["AZURE_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_DEPLOYMENT_KEY"]
             )
         )
         
@@ -378,9 +378,9 @@ async def main():
     
     # Validate environment setup
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+        "AZURE_DEPLOYMENT_NAME",
+        "AZURE_DEPLOYMENT_ENDPOINT", 
+        "AZURE_DEPLOYMENT_KEY"
     ]
     
     missing_vars = [var for var in required_vars if not os.getenv(var)]
