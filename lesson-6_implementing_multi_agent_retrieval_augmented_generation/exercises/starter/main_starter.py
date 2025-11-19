@@ -27,6 +27,10 @@ from semantic_kernel.contents import ChatMessageContent
 from blob_connector import BlobStorageConnector
 from chroma_manager import ChromaDBManager
 
+from dotenv import load_dotenv
+
+load_dotenv("../../.env")
+
 # SUPPRESS VERBOSE LOGGING
 warnings.filterwarnings("ignore")
 
@@ -61,9 +65,9 @@ class SequentialRAGOrchestration:
         self.kernel = Kernel()
         
         # Azure OpenAI service configuration
-        deployment_name = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_NAME", "gpt-4o-mini")
-        endpoint = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", "https://mock-openai.azure.com/")
-        api_key = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_KEY", "mock-key")
+        deployment_name = os.getenv("AZURE_DEPLOYMENT_NAME", "gpt-4o-mini")
+        endpoint = os.getenv("AZURE_DEPLOYMENT_ENDPOINT", "https://mock-openai.azure.com/")
+        api_key = os.getenv("AZURE_DEPLOYMENT_KEY", "mock-key")
         
         self.kernel.add_service(
             AzureChatCompletion(
@@ -564,9 +568,9 @@ async def main():
     
     # Check environment variables
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+        "AZURE_DEPLOYMENT_NAME", 
+        "AZURE_DEPLOYMENT_ENDPOINT",
+        "AZURE_DEPLOYMENT_KEY"
     ]
     
     missing_vars = [var for var in required_vars if not os.getenv(var)]
