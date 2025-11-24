@@ -1,41 +1,66 @@
-
-
+from typing import Dict, Any, List
+from datetime import datetime
 import threading
-from typing import Any, Dict, Tuple
-import json
-import os
 
 class SharedState:
-    """Thread-safe key-value store with simple versioning."""
-    def __init__(self):
-        self.activated_agents = []
-        self._lock = threading.RLock()
-        self._version = 0
-        self._state: Dict[str, Any] = {}
-
-    def read(self, key: str, default=None):
-        with self._lock:
-            return self._state.get(key, default)
-
-    def write(self, key: str, value: Any) -> int:
-        with self._lock:
-            self._state[key] = value
-            self._version += 1
-            return self._version
+    """
+    Thread-safe shared state for banking agents
+    """
     
-    def write_audit(self, filename: str) -> None:
-        """Write the current state and version to a JSON file. Creates directories if needed."""
+    def __init__(self):
+        self._lock = threading.RLock()
+        self.interactions: Dict[str, List[Dict[str, Any]]] = {}
+        self.customer_data: Dict[str, Dict[str, Any]] = {}
+        self.system_metrics: Dict[str, Any] = {
+            "total_interactions": 0,
+            "successful_processing": 0,
+            "failed_processing": 0,
+            "start_time": datetime.now().isoformat()
+        }
+    
+    def update_interaction(self, customer_id: str, interaction_data: Dict[str, Any]):
+        """Add or update customer interaction"""
         with self._lock:
-            data = {
-                "state": self._state,
-                "version": self._version
+            if customer_id not in self.interactions:
+                self.interactions[customer_id] = []
+            
+            self.interactions[customer_id].append(interaction_data)
+            self.system_metrics["total_interactions"] += 1
+            self.system_metrics["successful_processing"] += 1
+    
+    def record_failure(self, customer_id: str, error: str):
+        """Record processing failure"""
+        with self._lock:
+            self.system_metrics["failed_processing"] += 1
+            
+            failure_record = {
+                "customer_id": customer_id,
+                "error": error,
+                "timestamp": datetime.now().isoformat(),
+                "type": "processing_failure"
             }
-            dir_path = os.path.dirname(filename)
-            if dir_path and not os.path.exists(dir_path):
-                os.makedirs(dir_path, exist_ok=True)
-            with open(filename, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
-
-    def get_version(self) -> int:
+            
+            if customer_id not in self.interactions:
+                self.interactions[customer_id] = []
+            
+            self.interactions[customer_id].append(failure_record)
+    
+    def get_customer_interactions(self, customer_id: str) -> List[Dict[str, Any]]:
+        """Get all interactions for a customer"""
         with self._lock:
-            return self._version
+            return self.interactions.get(customer_id, [])
+    
+    def get_system_metrics(self) -> Dict[str, Any]:
+        """Get current system metrics"""
+        with self._lock:
+            return self.system_metrics.copy()
+    
+    def update_customer_data(self, customer_id: str, data: Dict[str, Any]):
+        """Update customer data cache"""
+        with self._lock:
+            self.customer_data[customer_id] = data
+    
+    def get_customer_data(self, customer_id: str) -> Dict[str, Any]:
+        """Get cached customer data"""
+        with self._lock:
+            return self.customer_data.get(customer_id, {})
