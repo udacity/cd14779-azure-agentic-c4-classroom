@@ -18,7 +18,7 @@ from chroma_manager import ChromaDBManager
 from shared_state import SharedState
 from dotenv import load_dotenv
 
-load_dotenv("../.env")
+load_dotenv("../../.env")
 
 # Global logger instance
 logger = logging.getLogger(__name__)
