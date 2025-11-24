@@ -1,34 +1,55 @@
 graph TB
-    User[User/Coffee Shop System]
+    User["👤 Customer Request<br/>'I need 3 lattes for my team'"]
 
-    System[Coffee Shop System<br/>Orchestrates workflow &<br/>coordinates agents]
-
-    State[Shared Shop State<br/>Pydantic Models:<br/>Coffee Orders, Inventory<br/>Daily Sales, Menu Items]
-
-    subgraph "Coffee Shop Multi-Agent System"
-        Order[Order Agent<br/>📋 Order Manager<br/>Semantic Kernel Instance]
-        Barista[Barista Agent<br/>☕ Barista Manager<br/>Semantic Kernel Instance]
-        Inventory[Inventory Agent<br/>📦 Inventory Manager<br/>Semantic Kernel Instance]
+    subgraph Manager["ModernCoffeeShopSystem"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service<br/>+ CoffeeShopPlugin"]
     end
 
-    User -->|Customer Request| System
+    Coordinator["🔄 Shop Coordinator<br/>Routes to Specialist<br/>Analyzes Request"]
 
-    System -->|Orchestrate workflow| Order
-    System -->|Orchestrate workflow| Barista
-    System -->|Orchestrate workflow| Inventory
+    subgraph Specialists["Specialist Agents with State Access"]
+        Orders["📋 Order Manager<br/>Customer Service & Workflow"]
+        Barista["👨‍🍳 Barista Manager<br/>Coffee Preparation & Equipment"]
+        Inventory["📦 Inventory Manager<br/>Supply Chain & Restocking"]
+    end
 
-    Order <-->|Read/Write State| State
-    Barista <-->|Read/Write State| State
-    Inventory <-->|Read/Write State| State
+    subgraph State["CoffeeShopState (KernelBaseModel)"]
+        OrdersDict["☕ Orders Dict<br/>+ is_ready()<br/>+ get_order_details()"]
+        Resources["🔧 Resources Dict<br/>+ is_available()<br/>+ get_resource_status()"]
+        InventoryDict["📦 Inventory Dict<br/>Beans, Milk, Cups<br/>Stock Levels"]
+    end
 
-    Order -.->|Response| System
-    Barista -.->|Response| System
-    Inventory -.->|Response| System
+    Response["📄 Specialist Response<br/>with Shop Analytics<br/>+ Workflow Coordination"]
 
-    System -.->|Coordinated Response| User
+    User -->|Shop Request| Manager
+    Manager -->|Route| Coordinator
 
-    style System fill:#ffd700
-    style State fill:#d4edda
-    style Order fill:#e1f5ff
-    style Barista fill:#fff4e1
-    style Inventory fill:#ffe1e1
+    Coordinator -->|Primary Agent| Orders
+    Coordinator -.->|Or Route to| Barista
+    Coordinator -.->|Or Route to| Inventory
+
+    Orders <-->|Read/Write State| State
+    Barista <-.->|Read/Write State| State
+    Inventory <-.->|Read State| State
+
+    State -->|State Data| OrdersDict
+    State -->|State Data| Resources
+    State -->|State Data| InventoryDict
+
+    Orders -->|Response + Analytics| Response
+    Barista -.->|Response + Analytics| Response
+    Inventory -.->|Response + Analytics| Response
+
+    Response -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Coordinator fill:#ffb366,stroke:#333,stroke-width:3px
+    style Orders fill:#90ee90,stroke:#333,stroke-width:3px
+    style Barista fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Inventory fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style State fill:#d4edda,stroke:#333,stroke-width:4px
+    style OrdersDict fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style Resources fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style InventoryDict fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style Response fill:#ffeb99,stroke:#333,stroke-width:3px

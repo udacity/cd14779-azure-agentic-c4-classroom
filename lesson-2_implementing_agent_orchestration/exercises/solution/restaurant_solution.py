@@ -6,7 +6,7 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
 
-load_dotenv("../../../.env")
+load_dotenv("../../.env")
 
 class RestaurantAgentManager:
     """Complete restaurant recommendation system with modern Semantic Kernel 1.37.0"""
@@ -19,9 +19,9 @@ class RestaurantAgentManager:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="azure_restaurant_chat",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+                deployment_name=os.environ["AZURE_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_DEPLOYMENT_KEY"]
             )
         )
         
@@ -113,10 +113,10 @@ class RestaurantAgentManager:
             print("2. 📍 Consulting Location Expert...")
             location_prompt = f"""Original Request: {request}
 
-Cuisine Analysis:
-{cuisine_content}
+            Cuisine Analysis:
+            {cuisine_content}
 
-Provide location recommendations that work well with these cuisine types."""
+            Provide location recommendations that work well with these cuisine types."""
             
             location_response = await self.agents["location"].get_response(location_prompt)
             location_content = str(location_response.content)
@@ -127,13 +127,13 @@ Provide location recommendations that work well with these cuisine types."""
             print("3. 💰 Consulting Price Expert...")
             price_prompt = f"""Original Request: {request}
 
-Cuisine Analysis:
-{cuisine_content}
+            Cuisine Analysis:
+            {cuisine_content}
 
-Location Analysis:
-{location_content}
+            Location Analysis:
+            {location_content}
 
-Provide price range recommendations that fit these cuisine and location choices."""
+            Provide price range recommendations that fit these cuisine and location choices."""
             
             price_response = await self.agents["price"].get_response(price_prompt)
             price_content = str(price_response.content)
@@ -144,18 +144,18 @@ Provide price range recommendations that fit these cuisine and location choices.
             print("4. 📋 Generating Integrated Recommendation...")
             coordinator_prompt = f"""Create a comprehensive restaurant recommendation based on all specialist inputs:
 
-ORIGINAL REQUEST: {request}
+            ORIGINAL REQUEST: {request}
 
-CUISINE ANALYSIS:
-{cuisine_content}
+            CUISINE ANALYSIS:
+            {cuisine_content}
 
-LOCATION ANALYSIS:
-{location_content}
+            LOCATION ANALYSIS:
+            {location_content}
 
-PRICE ANALYSIS:
-{price_content}
+            PRICE ANALYSIS:
+            {price_content}
 
-Synthesize this into a cohesive dining plan with specific restaurant suggestions, budget summary, and reservation advice."""
+            Synthesize this into a cohesive dining plan with specific restaurant suggestions, budget summary, and reservation advice."""
             
             coordinator_response = await self.agents["coordinator"].get_response(coordinator_prompt)
             coordinator_content = str(coordinator_response.content)
@@ -290,9 +290,9 @@ async def main():
     
     # Validate environment setup
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+        "AZURE_DEPLOYMENT_NAME",
+        "AZURE_DEPLOYMENT_ENDPOINT", 
+        "AZURE_DEPLOYMENT_KEY"
     ]
     
     missing_vars = [var for var in required_vars if not os.getenv(var)]

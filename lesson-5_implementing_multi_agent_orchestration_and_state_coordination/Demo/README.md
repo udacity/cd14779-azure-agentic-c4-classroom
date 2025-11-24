@@ -16,7 +16,12 @@ This demo teaches you how to:
 
 ![Architecture Diagram](architecture.png)
 
-Modern pasta factory system with four intelligent agents (Order Manager, Kitchen Manager, Quality Manager, Factory Coordinator) sharing state through KernelBaseModel with real-time production analytics and kernel function integration.
+This diagram shows the complete Pasta Factory multi-agent system architecture featuring:
+- **ModernPastaFactorySystem** with shared kernel and PastaFactoryPlugin
+- **Factory Coordinator** for intelligent request routing and agent collaboration
+- **Three Specialist Agents**: Order Manager, Kitchen Manager, and Quality Manager
+- **PastaFactoryState (KernelBaseModel)** managing Orders, Kitchen Resources, and Factory Metrics
+- Coordinator-based routing with bidirectional state access for real-time production analytics
 
 ---
 
@@ -72,9 +77,9 @@ pip install semantic-kernel==1.37.0 python-dotenv
 Create a `.env` file:
 
 ```env
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+AZURE_DEPLOYMENT_NAME=your-deployment-name
+AZURE_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_DEPLOYMENT_KEY=your-api-key
 ```
 
 ### 3️⃣ Run the Modern Demo

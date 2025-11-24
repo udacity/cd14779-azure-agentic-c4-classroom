@@ -11,7 +11,7 @@ from semantic_kernel.kernel_pydantic import KernelBaseModel
 from semantic_kernel.contents import ChatHistory
 from dotenv import load_dotenv
 
-load_dotenv("../../../.env")
+load_dotenv("../../.env")
 
 # TODO: Implement KernelBaseModel Models for State Management
 # Create the following models using KernelBaseModel instead of BaseModel:
@@ -85,9 +85,9 @@ class ProjectAgentManager:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="azure_project_chat",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+                deployment_name=os.environ["AZURE_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_DEPLOYMENT_KEY"]
             )
         )
         
@@ -341,9 +341,9 @@ async def main():
     
     # Validate environment setup
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+        "AZURE_DEPLOYMENT_NAME",
+        "AZURE_DEPLOYMENT_ENDPOINT", 
+        "AZURE_DEPLOYMENT_KEY"
     ]
     
     missing_vars = [var for var in required_vars if not os.getenv(var)]

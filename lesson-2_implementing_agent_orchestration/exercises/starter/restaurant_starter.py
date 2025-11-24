@@ -21,9 +21,9 @@ class RestaurantAgentManager:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="azure_restaurant_chat",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+                deployment_name=os.environ["AZURE_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_DEPLOYMENT_KEY"]
             )
         )
         
@@ -209,9 +209,9 @@ async def main():
     
     # Validate environment setup
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+        "AZURE_DEPLOYMENT_NAME",
+        "AZURE_DEPLOYMENT_ENDPOINT", 
+        "AZURE_DEPLOYMENT_KEY"
     ]
     
     missing_vars = [var for var in required_vars if not os.getenv(var)]

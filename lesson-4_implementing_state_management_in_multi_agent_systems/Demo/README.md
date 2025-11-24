@@ -16,7 +16,12 @@ This demo teaches you how to:
 
 ![Architecture Diagram](architecture.png)
 
-Modern bookstore system with four intelligent agents (Inventory, Sales, Recommendation, Coordinator) sharing state through KernelBaseModel with real-time analytics and kernel function integration.
+This diagram shows the complete Book Store multi-agent system architecture featuring:
+- **BookStoreAgentManager** with shared kernel and StoreOperationsPlugin
+- **Store Coordinator** for intelligent request routing
+- **Three Specialist Agents**: Inventory Manager, Sales Manager, and Recommendation Engine
+- **StoreState (KernelBaseModel)** managing Books, Customers, Orders, and Store Metrics
+- Bidirectional state access with kernel functions for real-time analytics
 
 ---
 
@@ -74,9 +79,9 @@ pip install semantic-kernel==1.37.0 python-dotenv
 Create a `.env` file:
 
 ```env
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+AZURE_DEPLOYMENT_NAME=your-deployment-name
+AZURE_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_DEPLOYMENT_KEY=your-api-key
 ```
 
 ### 3️⃣ Run the Modern Demo

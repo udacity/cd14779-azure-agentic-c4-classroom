@@ -1,27 +1,51 @@
 graph TB
-    User[User/Project Management System]
+    User["👤 User Request<br/>'Show me team capacity and workload'"]
 
-    State[Shared Project State<br/>Pydantic Models:<br/>Tasks, Team Members<br/>Project Timeline, Resources]
-
-    subgraph "Project Management Multi-Agent System"
-        Task[Task Agent<br/>✅ Task Manager<br/>Semantic Kernel Instance]
-        Resource[Resource Agent<br/>👥 Resource Manager<br/>Semantic Kernel Instance]
-        Progress[Progress Agent<br/>📊 Progress Tracker<br/>Semantic Kernel Instance]
+    subgraph Manager["ProjectAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service<br/>+ ProjectManagementPlugin"]
     end
 
-    User -->|Request| Task
-    User -->|Request| Resource
-    User -->|Request| Progress
+    subgraph Specialists["Specialist Agents with State Access"]
+        Tasks["✅ Task Manager<br/>Task Analysis & Assignments"]
+        Resources["👥 Resource Manager<br/>Team Capacity & Allocation"]
+        Progress["📊 Progress Tracker<br/>Project Metrics & Analytics"]
+    end
 
-    Task <-->|Read/Write State| State
-    Resource <-->|Read/Write State| State
-    Progress <-->|Read/Write State| State
+    subgraph State["ProjectState (KernelBaseModel)"]
+        TasksDict["📋 Tasks Dict<br/>+ is_overdue()<br/>+ get_task_info()"]
+        Members["👤 Team Members Dict<br/>+ is_available()<br/>+ get_member_profile()"]
+        Projects["🚀 Projects Dict<br/>+ completion_percentage()<br/>+ get_project_status()"]
+    end
 
-    Task -.->|Response| User
-    Resource -.->|Response| User
-    Progress -.->|Response| User
+    Response["📄 Specialist Response<br/>with Real-time Metrics<br/>+ Project Analytics"]
 
-    style State fill:#ffd700
-    style Task fill:#e1f5ff
-    style Resource fill:#fff4e1
-    style Progress fill:#ffe1e1
+    User -->|Management Request| Manager
+
+    Manager -->|Direct| Tasks
+    Manager -->|Direct| Resources
+    Manager -->|Direct| Progress
+
+    Tasks <-->|Read/Write State| State
+    Resources <-.->|Read State| State
+    Progress <-.->|Read State| State
+
+    State -->|State Data| TasksDict
+    State -->|State Data| Members
+    State -->|State Data| Projects
+
+    Tasks -->|Response + Metrics| Response
+    Resources -->|Response + Metrics| Response
+    Progress -->|Response + Metrics| Response
+
+    Response -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Tasks fill:#90ee90,stroke:#333,stroke-width:3px
+    style Resources fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style Progress fill:#ffa8d5,stroke:#333,stroke-width:2px
+    style State fill:#d4edda,stroke:#333,stroke-width:4px
+    style TasksDict fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style Members fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style Projects fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style Response fill:#ffeb99,stroke:#333,stroke-width:3px

@@ -1,0 +1,45 @@
+graph TB
+    User["👤 User Request<br/>'Check my account balance for ACC001'"]
+
+    subgraph Manager["BankAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service"]
+    end
+
+    Router["🔄 Routing Agent<br/>AI-Powered Analysis<br/>+ Specialist Determination<br/>+ Urgency Classification"]
+
+    subgraph Specialists["Specialist Agents"]
+        Account["🏦 Account Specialist<br/>Balance & Transactions"]
+        Loan["💰 Loan Specialist<br/>Applications & Rates"]
+        Card["💳 Card Specialist<br/>Card Services & Security"]
+        Emergency["🚨 Emergency Specialist<br/>Urgent Issues & Fraud"]
+    end
+
+    DataConnector["💾 BankDataConnector<br/>Azure SQL Database<br/>+ Real-time Transactions<br/>+ Balance Calculations"]
+
+    Response["📄 Data-Driven<br/>Personalized Response"]
+
+    User -->|Customer Request| Manager
+    Manager -->|AI Analysis| Router
+
+    Router -->|"Specialist: account<br/>Urgency: Low"| Account
+    Router -.->|Route to| Loan
+    Router -.->|Route to| Card
+    Router -.->|Route to| Emergency
+
+    Account <-->|Query/Context| DataConnector
+    Loan <-.->|Query/Context| DataConnector
+    Card <-.->|Query/Context| DataConnector
+    Emergency <-.->|Query/Context| DataConnector
+
+    Account -->|Enriched Response| Response
+    Response -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Router fill:#ffb366,stroke:#333,stroke-width:3px
+    style Account fill:#90ee90,stroke:#333,stroke-width:3px
+    style Loan fill:#fff4e1,stroke:#333,stroke-width:2px
+    style Card fill:#ffe1e1,stroke:#333,stroke-width:2px
+    style Emergency fill:#ffe1f0,stroke:#333,stroke-width:2px
+    style DataConnector fill:#d4edda,stroke:#333,stroke-width:3px
+    style Response fill:#ffeb99,stroke:#333,stroke-width:3px

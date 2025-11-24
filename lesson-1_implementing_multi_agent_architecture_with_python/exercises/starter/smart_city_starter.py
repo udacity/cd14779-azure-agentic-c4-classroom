@@ -17,9 +17,9 @@ class SmartCityAgentManager:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="azure_chat_completion",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+                deployment_name=os.environ["AZURE_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_DEPLOYMENT_KEY"]
             )
         )
         
@@ -136,15 +136,15 @@ async def main():
     # Complex collaborative scenario (sequential processing)
     complex_scenario = """MAJOR CITY INFRASTRUCTURE PROJECT:
 
-The city is planning a new subway line construction that will:
-1. Require 2 years of phased construction
-2. Affect major traffic arteries during construction  
-3. Increase energy demands for construction equipment
-4. Require safety planning for construction zones and public access
-5. Need long-term urban planning integration
-6. Has long-term environmental impact considerations
+    The city is planning a new subway line construction that will:
+    1. Require 2 years of phased construction
+    2. Affect major traffic arteries during construction  
+    3. Increase energy demands for construction equipment
+    4. Require safety planning for construction zones and public access
+    5. Need long-term urban planning integration
+    6. Has long-term environmental impact considerations
 
-All departments must collaborate on a comprehensive plan."""
+    All departments must collaborate on a comprehensive plan."""
     
     print("\n" + "=" * 60)
     print("🚀 Sequential Collaboration (Complete TODOs to enable)")
@@ -161,9 +161,9 @@ All departments must collaborate on a comprehensive plan."""
 if __name__ == "__main__":
     # Validate environment variables
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+        "AZURE_DEPLOYMENT_NAME",
+        "AZURE_DEPLOYMENT_ENDPOINT", 
+        "AZURE_DEPLOYMENT_KEY"
     ]
     
     missing_vars = [var for var in required_vars if not os.getenv(var)]

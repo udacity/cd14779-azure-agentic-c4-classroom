@@ -1,0 +1,40 @@
+graph TB
+    User["👤 User Request<br/>'What are the best hotels near Tokyo business district?'"]
+
+    subgraph Manager["TravelAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service"]
+        Analyzer["🔍 AI Request Analyzer<br/>Determines Needed Agents"]
+    end
+
+    subgraph Routing["CONDITIONAL PATTERN: Smart Agent Selection"]
+        Decision{"Smart Routing Logic<br/>Which agents are needed?"}
+
+        Agent1["🗺️ Destination Expert<br/>NOT NEEDED"]
+        Agent2["✈️ Flight Expert<br/>NOT NEEDED"]
+        Agent3["🏨 Accommodation Expert<br/>✅ SELECTED"]
+        Agent4["🎭 Activities Expert<br/>NOT NEEDED"]
+    end
+
+    Results["📋 Focused Results<br/>Only Accommodation<br/>Recommendations"]
+
+    User -->|Travel Request| Manager
+    Manager -->|Analyze Request| Analyzer
+    Analyzer -->|Route Based on Need| Decision
+
+    Decision -.->|Not Needed| Agent1
+    Decision -.->|Not Needed| Agent2
+    Decision -->|Execute| Agent3
+    Decision -.->|Not Needed| Agent4
+
+    Agent3 -->|Targeted Results| Results
+    Results -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Analyzer fill:#d5ffa8,stroke:#333,stroke-width:3px
+    style Decision fill:#90ee90,stroke:#333,stroke-width:3px
+    style Agent1 fill:#ddd,stroke:#999,stroke-width:1px,stroke-dasharray: 5 5
+    style Agent2 fill:#ddd,stroke:#999,stroke-width:1px,stroke-dasharray: 5 5
+    style Agent3 fill:#d5ffa8,stroke:#333,stroke-width:3px
+    style Agent4 fill:#ddd,stroke:#999,stroke-width:1px,stroke-dasharray: 5 5
+    style Results fill:#ffeb99,stroke:#333,stroke-width:3px

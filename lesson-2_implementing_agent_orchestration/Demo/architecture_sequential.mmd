@@ -1,0 +1,36 @@
+graph TB
+    User["👤 User Request<br/>'2-week cultural trip to Europe'"]
+
+    subgraph Manager["TravelAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service"]
+    end
+
+    subgraph Sequential["SEQUENTIAL PATTERN: Context-Aware Chain"]
+        Step1["Step 1<br/>🗺️ Destination Expert<br/>Analyzes request"]
+        Step2["Step 2<br/>✈️ Flight Expert<br/>Uses destination context"]
+        Step3["Step 3<br/>🏨 Accommodation Expert<br/>Uses destination + flight context"]
+        Step4["Step 4<br/>🎭 Activities Expert<br/>Uses all previous context"]
+        Step5["Step 5<br/>📋 Travel Coordinator<br/>Synthesizes all inputs"]
+    end
+
+    Result["📄 Comprehensive Integrated<br/>Travel Plan with Itinerary"]
+
+    User -->|Travel Request| Manager
+    Manager -->|Sequential Execution| Step1
+
+    Step1 -->|"Context Building"| Step2
+    Step2 -->|"+ Destination Context"| Step3
+    Step3 -->|"+ Flight Context"| Step4
+    Step4 -->|"+ Activities Context"| Step5
+
+    Step5 -->|Final Plan| Result
+    Result -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Step1 fill:#a8d5ff,stroke:#333,stroke-width:2px
+    style Step2 fill:#b8e0ff,stroke:#333,stroke-width:2px
+    style Step3 fill:#c8ebff,stroke:#333,stroke-width:2px
+    style Step4 fill:#d8f0ff,stroke:#333,stroke-width:2px
+    style Step5 fill:#90ee90,stroke:#333,stroke-width:3px
+    style Result fill:#ffeb99,stroke:#333,stroke-width:3px

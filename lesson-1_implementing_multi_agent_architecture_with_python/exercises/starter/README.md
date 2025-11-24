@@ -12,7 +12,11 @@ This starter code provides the foundation for building an advanced multi-agent s
 
 ## 🏗️ System Architecture Framework
 
-![Architecture Diagram](architecture.png)
+### Parallel Mode - Independent Analysis
+![Parallel Mode](architecture_parallel.png)
+
+### Sequential Mode - Context-Aware Chain
+![Sequential Mode](architecture_sequential.png)
 
 The starter code provides the basic structure:
 - **SmartCityAgentManager** orchestrates agent interactions
@@ -104,9 +108,9 @@ pip install semantic-kernel==1.37.0 python-dotenv
 Create `.env` file:
 
 ```env
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-foundry-deployment
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+AZURE_DEPLOYMENT_NAME=your-foundry-deployment
+AZURE_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_DEPLOYMENT_KEY=your-api-key
 ```
 
 ### 3. Run the Starter Code

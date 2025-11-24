@@ -32,6 +32,10 @@ logging.getLogger("semantic_kernel").setLevel(logging.WARNING)
 logging.getLogger("in_process_runtime").setLevel(logging.WARNING)
 logging.getLogger("in_process_runtime.events").setLevel(logging.WARNING)
 
+from dotenv import load_dotenv
+
+load_dotenv("../../.env")
+
 class ResearchReport(KernelBaseModel):
     """Model representing a final research report using KernelBaseModel"""
     report_id: str
@@ -55,9 +59,9 @@ class SequentialRAGOrchestration:
         self.kernel = Kernel()
         
         # Azure OpenAI service configuration
-        deployment_name = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_NAME", "gpt-4o-mini")
-        endpoint = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", "https://mock-openai.azure.com/")
-        api_key = os.getenv("AZURE_TEXTGENERATOR_DEPLOYMENT_KEY", "mock-key")
+        deployment_name = os.getenv("AZURE_DEPLOYMENT_NAME", "gpt-4o-mini")
+        endpoint = os.getenv("AZURE_DEPLOYMENT_ENDPOINT", "https://mock-openai.azure.com/")
+        api_key = os.getenv("AZURE_DEPLOYMENT_KEY", "mock-key")
         
         self.kernel.add_service(
             AzureChatCompletion(
@@ -610,9 +614,9 @@ async def main():
     
     # Check environment variables
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+        "AZURE_DEPLOYMENT_NAME", 
+        "AZURE_DEPLOYMENT_ENDPOINT",
+        "AZURE_DEPLOYMENT_KEY"
     ]
     
     missing_vars = [var for var in required_vars if not os.getenv(var)]

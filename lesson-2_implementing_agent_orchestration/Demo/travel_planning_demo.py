@@ -6,7 +6,7 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
 
-load_dotenv("../../.env")
+load_dotenv("../.env")
 
 class TravelAgentManager:
     """Modern travel agent manager using Semantic Kernel 1.37.0 agent framework"""
@@ -19,9 +19,9 @@ class TravelAgentManager:
         self.kernel.add_service(
             AzureChatCompletion(
                 service_id="azure_travel_chat",
-                deployment_name=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_NAME"],
-                endpoint=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT"],
-                api_key=os.environ["AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"]
+                deployment_name=os.environ["AZURE_DEPLOYMENT_NAME"],
+                endpoint=os.environ["AZURE_DEPLOYMENT_ENDPOINT"],
+                api_key=os.environ["AZURE_DEPLOYMENT_KEY"]
             )
         )
         
@@ -132,11 +132,11 @@ class TravelAgentManager:
             # Step 2: Flight options (using destination context)
             print("2. ✈️ Consulting Flight Expert...")
             flight_prompt = f"""Original Request: {travel_request}
-
-Destination Analysis:
-{dest_content}
-
-Provide flight recommendations considering these destinations."""
+            
+            Destination Analysis:
+            {dest_content}
+            
+            Provide flight recommendations considering these destinations."""
             
             flight_response = await self.agents["flights"].get_response(flight_prompt)
             flight_content = str(flight_response.content)
@@ -146,14 +146,13 @@ Provide flight recommendations considering these destinations."""
             # Step 3: Accommodation (using destination + flight context)
             print("3. 🏨 Consulting Accommodation Expert...")
             accom_prompt = f"""Original Request: {travel_request}
-
-Destination Analysis:
-{dest_content}
-
-Flight Analysis:
-{flight_content}
-
-Provide accommodation recommendations that work with these destinations and travel plans."""
+            Destination Analysis:
+            {dest_content}
+            
+            Flight Analysis:
+            {flight_content}
+            
+            Provide accommodation recommendations that work with these destinations and travel plans."""
             
             accom_response = await self.agents["accommodation"].get_response(accom_prompt)
             accom_content = str(accom_response.content)
@@ -163,17 +162,17 @@ Provide accommodation recommendations that work with these destinations and trav
             # Step 4: Activities (using all previous context)
             print("4. 🎭 Consulting Activities Expert...")
             activities_prompt = f"""Original Request: {travel_request}
-
-Destination Analysis:
-{dest_content}
-
-Flight & Travel Context:
-{flight_content}
-
-Accommodation Context:
-{accom_content}
-
-Provide activity and experience recommendations that complement the overall travel plan."""
+            
+            Destination Analysis:
+            {dest_content}
+            
+            Flight & Travel Context:
+            {flight_content}
+            
+            Accommodation Context:
+            {accom_content}
+            
+            Provide activity and experience recommendations that complement the overall travel plan."""
             
             activities_response = await self.agents["activities"].get_response(activities_prompt)
             activities_content = str(activities_response.content)
@@ -183,22 +182,22 @@ Provide activity and experience recommendations that complement the overall trav
             # Step 5: Integrated coordination
             print("5. 📋 Generating Integrated Travel Plan...")
             coordinator_prompt = f"""Create a comprehensive travel plan based on all specialist inputs:
-
-ORIGINAL REQUEST: {travel_request}
-
-DESTINATION ANALYSIS:
-{dest_content}
-
-FLIGHT ANALYSIS:
-{flight_content}
-
-ACCOMMODATION ANALYSIS:
-{accom_content}
-
-ACTIVITIES ANALYSIS:
-{activities_content}
-
-Synthesize this into a cohesive travel itinerary with clear recommendations, budget summary, and next steps."""
+            
+            ORIGINAL REQUEST: {travel_request}
+            
+            DESTINATION ANALYSIS:
+            {dest_content}
+            
+            FLIGHT ANALYSIS:
+            {flight_content}
+            
+            ACCOMMODATION ANALYSIS:
+            {accom_content}
+            
+            ACTIVITIES ANALYSIS:
+            {activities_content}
+            
+            Synthesize this into a cohesive travel itinerary with clear recommendations, budget summary, and next steps."""
             
             coordinator_response = await self.agents["coordinator"].get_response(coordinator_prompt)
             coordinator_content = str(coordinator_response.content)
@@ -252,20 +251,20 @@ Synthesize this into a cohesive travel itinerary with clear recommendations, bud
         # Use AI to analyze which agents are needed
         analysis_prompt = f"""Analyze this travel request and determine which specialists are needed:
 
-REQUEST: {travel_request}
+        REQUEST: {travel_request}
 
-Available specialists:
-- destination: For "where to go", destination recommendations, place suggestions
-- flights: For "how to get there", flights, transportation, travel logistics  
-- accommodation: For "where to stay", hotels, lodging, accommodation
-- activities: For "what to do", tours, experiences, activities
+        Available specialists:
+        - destination: For "where to go", destination recommendations, place suggestions
+        - flights: For "how to get there", flights, transportation, travel logistics  
+        - accommodation: For "where to stay", hotels, lodging, accommodation
+        - activities: For "what to do", tours, experiences, activities
 
-For each specialist, provide:
-- Needed: Yes/No
-- Reason: Brief explanation
-- Priority: High/Medium/Low
+        For each specialist, provide:
+        - Needed: Yes/No
+        - Reason: Brief explanation
+        - Priority: High/Medium/Low
 
-Respond in a structured format."""
+        Respond in a structured format."""
         
         self.runtime.start()
         
@@ -379,9 +378,9 @@ async def main():
     
     # Validate environment setup
     required_vars = [
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_NAME",
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT", 
-        "AZURE_TEXTGENERATOR_DEPLOYMENT_KEY"
+        "AZURE_DEPLOYMENT_NAME",
+        "AZURE_DEPLOYMENT_ENDPOINT", 
+        "AZURE_DEPLOYMENT_KEY"
     ]
     
     missing_vars = [var for var in required_vars if not os.getenv(var)]

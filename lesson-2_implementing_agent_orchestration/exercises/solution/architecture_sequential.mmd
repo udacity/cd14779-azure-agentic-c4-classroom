@@ -1,0 +1,33 @@
+graph TB
+    User["👤 User Request<br/>'Anniversary dinner, Italian food, medium budget'"]
+
+    subgraph Manager["RestaurantAgentManager"]
+        Kernel["Shared Kernel<br/>+ Azure OpenAI Service"]
+    end
+
+    subgraph Sequential["SEQUENTIAL PATTERN: Context-Aware Chain"]
+        Step1["Step 1<br/>🍽️ Cuisine Expert<br/>Analyzes request"]
+        Step2["Step 2<br/>📍 Location Expert<br/>Uses cuisine context"]
+        Step3["Step 3<br/>💰 Price Expert<br/>Uses cuisine + location context"]
+        Step4["Step 4<br/>📋 Restaurant Coordinator<br/>Synthesizes all inputs"]
+    end
+
+    Result["📄 Comprehensive Integrated<br/>Restaurant Recommendation"]
+
+    User -->|Dining Request| Manager
+    Manager -->|Sequential Execution| Step1
+
+    Step1 -->|"Context Building"| Step2
+    Step2 -->|"+ Cuisine Context"| Step3
+    Step3 -->|"+ Location Context"| Step4
+
+    Step4 -->|Final Plan| Result
+    Result -->|Display| User
+
+    style User fill:#e1f5ff,stroke:#333,stroke-width:3px
+    style Manager fill:#ffd700,stroke:#333,stroke-width:3px
+    style Step1 fill:#a8d5ff,stroke:#333,stroke-width:2px
+    style Step2 fill:#b8e0ff,stroke:#333,stroke-width:2px
+    style Step3 fill:#c8ebff,stroke:#333,stroke-width:2px
+    style Step4 fill:#90ee90,stroke:#333,stroke-width:3px
+    style Result fill:#ffeb99,stroke:#333,stroke-width:3px

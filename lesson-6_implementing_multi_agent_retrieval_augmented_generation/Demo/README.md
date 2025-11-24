@@ -104,9 +104,9 @@ BLOB_CONNECTION_STRING=your_blob_connection_string
 BLOB_CONTAINER_NAME=rag-documents
 
 # Azure OpenAI
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=gpt-4o-mini
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=your_azure_openai_endpoint
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your_azure_openai_key
+AZURE_DEPLOYMENT_NAME=gpt-4o-mini
+AZURE_DEPLOYMENT_ENDPOINT=your_azure_openai_endpoint
+AZURE_DEPLOYMENT_KEY=your_azure_openai_key
 ```
 
 **Note**: The system includes mock implementations for demo purposes when Azure services are not configured.

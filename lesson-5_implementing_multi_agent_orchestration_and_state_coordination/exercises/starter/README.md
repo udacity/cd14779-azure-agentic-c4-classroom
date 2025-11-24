@@ -9,7 +9,12 @@ Implement a modern multi-agent coffee shop system using **Semantic Kernel 1.37.0
 
 ![Architecture Diagram](architecture.png)
 
-Target architecture showing the modern coffee shop system you'll build using **KernelBaseModel** for state management and **ChatCompletionAgent** framework with four specialized agents (Order Manager, Barista Manager, Inventory Manager, Shop Coordinator) for intelligent coordination.
+Target architecture for the Coffee Shop system you'll build featuring:
+- **ModernCoffeeShopSystem** with shared kernel and CoffeeShopPlugin
+- **Shop Coordinator** for intelligent request routing and agent collaboration
+- **Three Specialist Agents**: Order Manager, Barista Manager, and Inventory Manager
+- **CoffeeShopState (KernelBaseModel)** managing Orders, Resources, and Inventory
+- Coordinator-based routing with bidirectional state access for real-time shop analytics
 
 ---
 
@@ -147,9 +152,9 @@ Implement 5 modern scenarios that demonstrate:
 pip install semantic-kernel==1.37.0 python-dotenv
 
 # Ensure Azure OpenAI credentials in .env file
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+AZURE_DEPLOYMENT_NAME=your-deployment-name
+AZURE_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_DEPLOYMENT_KEY=your-api-key
 ```
 
 ### 2. **Implementation Order**

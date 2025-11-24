@@ -10,7 +10,11 @@ This complete **project management system** demonstrates sophisticated **state m
 
 ![Architecture Diagram](architecture.png)
 
-Modern project management system with four specialized agents (Task Manager, Resource Manager, Progress Tracker, Project Coordinator) sharing state through KernelBaseModel for coordinated project tracking and resource allocation.
+This diagram shows the complete Project Management multi-agent system architecture featuring:
+- **ProjectAgentManager** with shared kernel and ProjectManagementPlugin
+- **Three Specialist Agents**: Task Manager, Resource Manager, and Progress Tracker
+- **ProjectState (KernelBaseModel)** managing Tasks, Team Members, and Projects
+- Direct routing to specialists with bidirectional state access for real-time project analytics
 
 ---
 
@@ -33,12 +37,11 @@ Modern project management system with four specialized agents (Task Manager, Res
 
 ---
 
-### 🤖 Four Specialist Agents
+### 🤖 Three Specialist Agents
 
 1. **📋 Task Manager** — Manages task distribution, priorities, and deadlines using kernel functions
 2. **👥 Resource Manager** — Optimizes team allocation, capacity, and workload balancing
 3. **📈 Progress Tracker** — Tracks metrics, provides data-driven insights and analytics
-4. **🔄 Project Coordinator** — Intelligent routing and coordination between specialists
 
 ---
 
@@ -86,12 +89,6 @@ Modern project management system with four specialized agents (Task Manager, Res
 * Performance insights and trend identification
 * Bottleneck identification and acceleration strategies
 
-**Project Coordinator Agent**
-
-* Intelligent request routing and analysis
-* Multi-agent collaboration coordination
-* Context-aware specialist selection
-
 ---
 
 ### 🧱 Realistic Sample Data with Kernel Functions
@@ -120,9 +117,9 @@ pip install semantic-kernel==1.37.0 python-dotenv
 Create a `.env` file:
 
 ```env
-AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=your-deployment-name
-AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+AZURE_DEPLOYMENT_NAME=your-deployment-name
+AZURE_DEPLOYMENT_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_DEPLOYMENT_KEY=your-api-key
 ```
 
 ---
@@ -152,7 +149,7 @@ Semantic Kernel 1.37.0 with Advanced Agent Framework
 • System Status: 🟢 Operational
 
 🚀 Starting multi-agent project management demonstrations...
-Available Agents: Task Manager, Resource Manager, Progress Tracker, Project Coordinator
+Available Agents: Task Manager, Resource Manager, Progress Tracker
 Available Functions: Task Metrics, Team Capacity, Project Progress, Status Tracking
 
 🎯 PROJECT REQUEST PROCESSING COMPLETE
@@ -199,7 +196,7 @@ Recommendations:
 ### 2️⃣ Advanced Multi-Agent Coordination
 
 * Domain-specific agent expertise with kernel function access
-* Intelligent routing through coordinator agent
+* Direct agent access with specialized capabilities
 * Collaborative problem-solving with shared context
 
 ### 3️⃣ Semantic Kernel 1.37.0 Mastery
