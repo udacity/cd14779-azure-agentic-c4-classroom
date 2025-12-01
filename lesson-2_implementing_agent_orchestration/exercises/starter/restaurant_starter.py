@@ -6,7 +6,7 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents.runtime import InProcessRuntime
 from dotenv import load_dotenv
 
-load_dotenv("../../../.env")
+load_dotenv()
 
 class RestaurantAgentManager:
     """Modern restaurant recommendation manager using Semantic Kernel 1.37.0"""

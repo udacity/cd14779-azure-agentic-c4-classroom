@@ -1,15 +1,3 @@
-"""
-Udacity AI Programming Course - Multi-Agent RAG System Exercise
-Exercise: Build a Sequential Orchestration RAG System with Semantic Kernel
-
-Learning Objectives:
-1. Understand multi-agent systems and sequential orchestration
-2. Implement document retrieval and chunking with ChromaDB
-3. Create specialized AI agents for different analysis tasks
-4. Build a comprehensive research report generation system
-5. Handle errors and edge cases in agent workflows
-"""
-
 import asyncio
 import os
 import uuid
@@ -29,7 +17,7 @@ from chroma_manager import ChromaDBManager
 
 from dotenv import load_dotenv
 
-load_dotenv("../../.env")
+load_dotenv()
 
 # SUPPRESS VERBOSE LOGGING
 warnings.filterwarnings("ignore")

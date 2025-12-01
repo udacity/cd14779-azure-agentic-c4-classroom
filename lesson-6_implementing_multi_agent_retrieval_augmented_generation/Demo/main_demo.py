@@ -17,7 +17,7 @@ from chroma_manager import ChromaDBManager
 
 from dotenv import load_dotenv
 
-load_dotenv("../.env")
+load_dotenv()
 
 # SUPPRESS VERBOSE LOGGING
 warnings.filterwarnings("ignore")

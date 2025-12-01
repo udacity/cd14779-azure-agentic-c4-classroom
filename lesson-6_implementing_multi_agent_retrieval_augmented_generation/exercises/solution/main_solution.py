@@ -1,8 +1,3 @@
-"""
-Udacity AI Programming Course - Multi-Agent RAG System Exercise
-SOLUTION CODE - COMPLETED IMPLEMENTATION
-"""
-
 import asyncio
 import os
 import uuid
@@ -34,7 +29,7 @@ logging.getLogger("in_process_runtime.events").setLevel(logging.WARNING)
 
 from dotenv import load_dotenv
 
-load_dotenv("../../.env")
+load_dotenv()
 
 class ResearchReport(KernelBaseModel):
     """Model representing a final research report using KernelBaseModel"""

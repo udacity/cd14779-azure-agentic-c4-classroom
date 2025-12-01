@@ -11,7 +11,7 @@ from semantic_kernel.kernel_pydantic import KernelBaseModel
 from semantic_kernel.contents import ChatHistory
 from dotenv import load_dotenv
 
-load_dotenv("../../.env")
+load_dotenv()
 
 # TODO: Define KernelBaseModel Models using modern Semantic Kernel
 # Create models for:

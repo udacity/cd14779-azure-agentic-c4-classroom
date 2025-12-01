@@ -11,7 +11,7 @@ from semantic_kernel.kernel_pydantic import KernelBaseModel
 from semantic_kernel.contents import ChatHistory
 from dotenv import load_dotenv
 
-load_dotenv("../../.env")
+load_dotenv()
 
 # TODO: Implement KernelBaseModel Models for State Management
 # Create the following models using KernelBaseModel instead of BaseModel:
