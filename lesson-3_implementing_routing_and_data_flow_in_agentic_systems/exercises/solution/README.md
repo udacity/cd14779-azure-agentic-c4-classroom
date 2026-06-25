@@ -146,7 +146,7 @@ Data-Driven Medical Response
 ### 1. Installation with Latest Dependencies
 
 ```bash
-pip install semantic-kernel==1.37.0 python-dotenv mssql-python
+pip install semantic-kernel==1.37.0 python-dotenv mssql-python==1.9.0
 ```
 
 > **SQL driver reference**: [mssql-python Quickstart — Microsoft Learn](https://learn.microsoft.com/en-us/sql/connect/python/mssql-python/python-sql-driver-mssql-python-quickstart?view=sql-server-ver17&tabs=windows%2Cazure-sql)
