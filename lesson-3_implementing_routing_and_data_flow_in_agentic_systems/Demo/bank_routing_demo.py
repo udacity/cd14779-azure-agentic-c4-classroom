@@ -1,6 +1,6 @@
 import asyncio
 import os
-import pyodbc
+import mssql_python
 from contextlib import contextmanager
 from typing import List, Dict, Optional
 from semantic_kernel import Kernel
@@ -25,7 +25,7 @@ class BankDataConnector:
     @contextmanager
     def get_db_connection(self):
         """Database connection helper for Azure SQL Server"""
-        conn = pyodbc.connect(self.connection_string)
+        conn = mssql_python.connect(self.connection_string)
         try:
             yield conn
         finally:

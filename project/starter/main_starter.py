@@ -2,7 +2,7 @@ import asyncio
 import os
 import uuid
 import logging
-import pyodbc
+import mssql_python
 import json
 from typing import List, Dict, Any, Optional
 from datetime import datetime
@@ -131,7 +131,7 @@ class TestResult:
 class DataConnector:
     """
     TODO: Implement Azure SQL Database connectivity
-    HINT: Use pyodbc to connect to Azure SQL and fetch customer transaction data
+    HINT: Use mssql_python to connect to Azure SQL and fetch customer transaction data
     """
     def __init__(self, connection_string: Optional[str] = None):
         # TODO: Initialize connection string from environment variables
@@ -141,7 +141,7 @@ class DataConnector:
     
     def _test_connection(self):
         """TODO: Test database connection on initialization"""
-        # HINT: Use pyodbc.connect() and execute a simple query like "SELECT 1"
+        # HINT: Use mssql_python.connect() and execute a simple query like "SELECT 1"
         raise NotImplementedError("Connection testing not implemented")
     
     async def fetch_income(self, customer_id: str) -> Optional[float]:
@@ -159,7 +159,7 @@ class DataConnector:
     @contextmanager
     def get_db_connection(self):
         """TODO: Create database connection context manager"""
-        # HINT: Use pyodbc.connect() and yield the connection
+        # HINT: Use mssql_python.connect() and yield the connection
         # HINT: Add proper error handling and connection cleanup
         raise NotImplementedError("Database connection not implemented")
 

@@ -146,7 +146,7 @@ Data-Driven Medical Response
 ### 1. Installation with Latest Dependencies
 
 ```bash
-pip install semantic-kernel==1.37.0 python-dotenv pyodbc
+pip install semantic-kernel==1.37.0 python-dotenv mssql-python
 ```
 
 ### 2. Environment Configuration

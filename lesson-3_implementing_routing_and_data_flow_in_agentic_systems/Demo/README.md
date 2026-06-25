@@ -179,9 +179,7 @@ async def process_with_specialist(self, customer_request: str, specialist: str, 
 
 ### 1. Installation
 ```bash
-pip install semantic-kernel==1.37.0 python-dotenv pyodbc
-# Install ODBC driver for macOS
-brew install unixodbc
+pip install semantic-kernel==1.37.0 python-dotenv mssql-python
 ```
 
 ### 2. Azure Configuration
