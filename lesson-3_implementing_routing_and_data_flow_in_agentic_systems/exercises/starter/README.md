@@ -113,6 +113,8 @@ This diagram depicts the modern hospital triage system architecture featuring in
 pip install semantic-kernel==1.37.0 python-dotenv mssql-python
 ```
 
+> **SQL driver reference**: [mssql-python Quickstart — Microsoft Learn](https://learn.microsoft.com/en-us/sql/connect/python/mssql-python/python-sql-driver-mssql-python-quickstart?view=sql-server-ver17&tabs=windows%2Cazure-sql)
+
 ### 2. Environment Configuration
 
 Create a `.env` file with your Azure services:
