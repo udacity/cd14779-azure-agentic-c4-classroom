@@ -39,7 +39,8 @@ agent = ChatCompletionAgent(
 **TODO**: Implement data retrieval from Azure SQL Database
 
 **Hints**:
-- Use `pyodbc` for database connectivity
+- Use `mssql_python` (`mssql-python` package) for database connectivity
+- See the official quickstart guide: [mssql-python Quickstart — Microsoft Learn](https://learn.microsoft.com/en-us/sql/connect/python/mssql-python/python-sql-driver-mssql-python-quickstart?view=sql-server-ver17&tabs=windows%2Cazure-sql)
 - Create proper connection string management
 - Implement async methods for data fetching
 - Handle connection errors gracefully

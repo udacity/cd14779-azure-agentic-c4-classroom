@@ -57,7 +57,7 @@ A sophisticated AI system that:
 - `fetch_transactions(customer_id)`
 - `get_db_connection()`
 
-**Hint**: Use `pyodbc` library for database connections.
+**Hint**: Use `mssql_python` (`mssql-python` package) for database connections. See the [mssql-python Quickstart — Microsoft Learn](https://learn.microsoft.com/en-us/sql/connect/python/mssql-python/python-sql-driver-mssql-python-quickstart?view=sql-server-ver17&tabs=windows%2Cazure-sql).
 
 ---
 
@@ -140,7 +140,7 @@ agent = ChatCompletionAgent(
 # Example database connection structure
 @contextmanager
 def get_db_connection(self):
-    conn = pyodbc.connect(self.connection_string)
+    conn = mssql_python.connect(self.connection_string)
     try:
         yield conn
     finally:
